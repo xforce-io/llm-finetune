@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=0,1,2,3 deepspeed --num_gpus=4 \
+deepspeed --num_gpus=8 \
     finetune/finetune.py \
     --deepspeed_config conf/deepspeed_config.json \
     --model_name_or_path bigscience/bloomz-560m \
