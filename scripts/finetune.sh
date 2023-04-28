@@ -1,4 +1,4 @@
-python finetune/finetune.py \
+CUDA_VISIBLE_DEVICES=0,1,2,3 python finetune/finetune.py \
     --model_name_or_path bigscience/bloomz-560m \
     --train_file data/sample_train.txt \
     --validation_file data/sample_eval.txt \

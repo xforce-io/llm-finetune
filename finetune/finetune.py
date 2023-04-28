@@ -248,7 +248,6 @@ def main():
         args=training_args,
         train_dataset=dataset.train_dataset if training_args.do_train else None,
         eval_dataset=dataset.eval_dataset if training_args.do_eval else None,
-        tokenizer=tokenizer,
         data_collator=default_data_collator,
         compute_metrics=compute_metrics if training_args.do_eval and not is_torch_tpu_available() else None,
         preprocess_logits_for_metrics=\
