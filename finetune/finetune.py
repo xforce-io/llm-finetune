@@ -141,7 +141,7 @@ def training(
         elif last_checkpoint is not None:
             checkpoint = last_checkpoint
 
-        trainer.model, _, _, _ = deepspeed.initialize(model=trainer.model, args=args.data_args.deepspeed_config)
+        trainer.model, _, _, _ = deepspeed.initialize(model=trainer.model, config=args.data_args.deepspeed_config)
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
         trainer.save_model()  # Saves the tokenizer too for easy upload
 
