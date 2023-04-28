@@ -4,7 +4,7 @@ deepspeed --num_gpus=8 \
     --model_name_or_path bigscience/bloomz-560m \
     --train_file data/sample_train.txt \
     --validation_file data/sample_eval.txt \
-    --block_size 2048 \
+    --block_size 1024 \
     --do_train \
     --do_eval \
     --output_dir output/checkpoint_emb
