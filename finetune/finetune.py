@@ -99,6 +99,12 @@ def loadPretrain(model_args :ModelArguments) :
             if model_args.torch_dtype in ["auto", None]
             else getattr(torch, model_args.torch_dtype)
         )
+
+        MAX_MEM_PER_GPU = "78GB"
+        max_mem = {}
+        for i in range(8):
+            max_mem[i] = MAX_MEM_PER_GPU
+        
         model = AutoModelForCausalLM.from_pretrained(
             model_args.model_name_or_path,
             from_tf=bool(".ckpt" in model_args.model_name_or_path),
@@ -108,6 +114,7 @@ def loadPretrain(model_args :ModelArguments) :
             use_auth_token=True if model_args.use_auth_token else None,
             torch_dtype=torch_dtype,
             low_cpu_mem_usage=model_args.low_cpu_mem_usage,
+            max_memory= max_mem
         )
     else:
         model = AutoModelForCausalLM.from_config(config)
