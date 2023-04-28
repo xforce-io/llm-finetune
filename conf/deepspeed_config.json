@@ -1,0 +1,26 @@
+{
+    "train_batch_size": 32,
+    "gradient_accumulation_steps": 1,
+    "fp16": {
+        "enabled": true
+    },
+    "optimizer": {
+        "type": "Adam",
+        "params": {
+            "lr": 5e-5
+        }
+    },
+    "scheduler": {
+        "type": "linear",
+        "params": {
+            "warmup_min_lr": 0,
+            "warmup_max_lr": 5e-5,
+            "warmup_num_steps": 1000,
+            "total_num_steps": 10000
+        }
+    },
+    "zero_optimization": {
+        "stage": 2
+    },
+    "wall_clock_breakdown": true
+}
