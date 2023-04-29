@@ -89,7 +89,7 @@ def getResponse(instruction, input, **kwargs):
     else:
         prompt = input
         
-    inputs = tokenizer(text=prompt, return_tensors="pt")
+    inputs = tokenizer(prompt, return_tensors="pt")
     inputIds = inputs["input_ids"].to("cuda")
     generationConfig = GenerationConfig(
         temperature=kwargs["temperature"],
