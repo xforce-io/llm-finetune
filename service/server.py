@@ -50,13 +50,13 @@ def initModel(
 @app.route("/v1/completions", methods=["POST"])
 def completion():
     if request.method == "POST":
-        prompt = request.args.get("prompt")
+        prompt = request.get_json().get("prompt")
         print("prompt[%s]" % prompt)
-        temperature = request.args.get("temperature", kTemperature)
-        topP = request.args.get("top_p", kTopP)
-        topK = request.args.get("top_k", kTopK)
-        maxTokens = request.args.get("max_tokens", kMaxTokens)
-        stop = request.args.get("stop", kStop)
+        temperature = request.get_json().get("temperature", kTemperature)
+        topP = request.get_json().get("top_p", kTopP)
+        topK = request.get_json().get("top_k", kTopK)
+        maxTokens = request.get_json().get("max_tokens", kMaxTokens)
+        stop = request.get_json().get("stop", kStop)
         response = getResponse(
             None,
             prompt,
