@@ -16,15 +16,18 @@ app = Flask(__name__)
 model = None
 tokenizer = None
 
-def initModel(modelNameOrPath, loraWeights):
+def initModel(
+        tokenizerNameOrPath,
+        modelNameOrPath, 
+        loraWeights):
     if not loraWeights:
-        tokenizer = AutoTokenizer.from_pretrained(modelNameOrPath) 
+        tokenizer = AutoTokenizer.from_pretrained(tokenizerNameOrPath) 
         model = AutoModelForCausalLM.from_pretrained(
             modelNameOrPath,
             torch_dtype=torch.float16,
             device_map="auto")
     else:
-        tokenizer = AutoTokenizer.from_pretrained(modelNameOrPath) 
+        tokenizer = AutoTokenizer.from_pretrained(tokenizerNameOrPath) 
         model = AutoModelForCausalLM.from_pretrained(
             modelNameOrPath,
             torch_dtype=torch.float16,
@@ -47,12 +50,12 @@ def initModel(modelNameOrPath, loraWeights):
 @app.route("/v1/completions", methods=["POST"])
 def completion():
     if request.method == "POST":
-        prompt = requset.args.get("prompt")
+        prompt = request.args.get("prompt")
         temperature = request.args.get("temperature", kTemperature)
-        topP = requset.args.get("top_p", kTopP)
+        topP = request.args.get("top_p", kTopP)
         topK = request.args.get("top_k", kTopK)
-        maxTokens = requset.args.get("max_tokens", kMaxTokens)
-        stop = requset.args.get("stop", kStop)
+        maxTokens = request.args.get("max_tokens", kMaxTokens)
+        stop = request.args.get("stop", kStop)
         response = getResponse(
             None,
             prompt,
@@ -111,12 +114,18 @@ def getResponse(instruction, input, **kwargs):
     else:
         return output
 
-def runApp(model_name_or_path, lora_weights=None):
+def runApp(
+        tokenizer_name_or_path,
+        model_name_or_path, 
+        lora_weights=None):
+    assert(tokenizer_name_or_path)
     assert(model_name_or_path)
 
     global model, tokenizer
     model, tokenizer = initModel(
-        model_name_or_path, lora_weights)
+        tokenizer_name_or_path,
+        model_name_or_path, 
+        lora_weights)
     
     app.run(debug = True)
 

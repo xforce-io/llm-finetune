@@ -1,1 +1,3 @@
-python service/server.py --model_name_or_path=output/checkpoint
+python service/server.py \
+    --tokenizer_name_or_path=bigscience/bloom-560m \
+    --model_name_or_path=output/checkpoint
