@@ -1,1 +1,1 @@
-python service/server.py --model_name_or_path=bigscience/bloom-560m
+python service/server.py --model_name_or_path=output/checkpoint
