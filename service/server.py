@@ -111,7 +111,7 @@ def getResponse(instruction, input, **kwargs):
     else:
         return output
 
-def runApp(model_name_or_path, lora_weights):
+def runApp(model_name_or_path, lora_weights=None):
     assert(model_name_or_path)
 
     global model, tokenizer
