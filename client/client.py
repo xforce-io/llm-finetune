@@ -20,7 +20,7 @@ def post_request(url, prompt):
         # 对返回的 JSON 数据进行处理
         print(result)
     else:
-        print('请求失败')
+        print('fail request')
 
 if __name__ == '__main__':
     fire.Fire(post_request)
