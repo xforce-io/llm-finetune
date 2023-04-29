@@ -51,6 +51,7 @@ def initModel(
 def completion():
     if request.method == "POST":
         prompt = request.args.get("prompt")
+        print("prompt[%s]" % prompt)
         temperature = request.args.get("temperature", kTemperature)
         topP = request.args.get("top_p", kTopP)
         topK = request.args.get("top_k", kTopK)
@@ -89,7 +90,7 @@ def getResponse(instruction, input, **kwargs):
     else:
         prompt = input
         
-    inputs = tokenizer.tokenize(prompt, return_tensors="pt")
+    inputs = tokenizer(prompt, return_tensors="pt")
     inputIds = inputs["input_ids"].to("cuda")
     generationConfig = GenerationConfig(
         temperature=kwargs["temperature"],
