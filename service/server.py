@@ -1,4 +1,4 @@
-from flask import Flask, requset, jsonify
+from flask import Flask, request, jsonify
 from transformers import GenerationConfig, AutoModelForCausalLM, AutoTokenizer
 from prompter import Prompter
 import torch
@@ -111,11 +111,12 @@ def getResponse(instruction, input, **kwargs):
     else:
         return output
 
-def runApp(modelNameOrPath, loraWeights):
-    assert(modelNameOrPath)
+def runApp(model_name_or_path, lora_weights):
+    assert(model_name_or_path)
 
     global model, tokenizer
-    model, tokenizer = initModel(modelNameOrPath, loraWeights)
+    model, tokenizer = initModel(
+        model_name_or_path, lora_weights)
     
     app.run(debug = True)
 
