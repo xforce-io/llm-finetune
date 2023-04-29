@@ -5,13 +5,14 @@ import fire
 def post_request(url, prompt):
     # 构建请求数据
     data = {
-        'prompt': prompt,
-        'key1': 'value1',
-        'key2': 'value2'
+        'prompt': prompt
     }
 
+    # 设置 headers，包括 Content-Type
+    headers = {'Content-Type': 'application/json'}
+
     # 发送 POST 请求
-    response = requests.post(url, json=data)
+    response = requests.post(url, json=data, headers=headers)
 
     # 处理响应
     if response.status_code == 200:
