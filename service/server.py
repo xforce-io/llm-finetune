@@ -1,10 +1,9 @@
 from flask import Flask, requset, jsonify
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from service import Prompter
+from transformers import GenerationConfig, AutoModelForCausalLM, AutoTokenizer
+from prompter import Prompter
 import torch
 import fire
 
-kBaseModel = "decapoda-research/llama-13b-hf"
 kTemperature = 0.1
 kTopP = 0.75
 kTopK = 40
@@ -17,23 +16,31 @@ app = Flask(__name__)
 model = None
 tokenizer = None
 
-def initModel(loraWeights):
-   tokenizer = AutoTokenizer.from_pretrained(kBaseModel) 
-   model = AutoModelForCausalLM.from_pretrained(
-       kBaseModel,
-       torch_dtype=torch.float16,
-       device_map="auto")
-    model = PeftModel.from_pretrained(
-        model,
-        loraWeights,
-        torch_type=torch.float16) 
+def initModel(modelNameOrPath, loraWeights):
+    if not loraWeights:
+        tokenizer = AutoTokenizer.from_pretrained(modelNameOrPath) 
+        model = AutoModelForCausalLM.from_pretrained(
+            modelNameOrPath,
+            torch_dtype=torch.float16,
+            device_map="auto")
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(modelNameOrPath) 
+        model = AutoModelForCausalLM.from_pretrained(
+            modelNameOrPath,
+            torch_dtype=torch.float16,
+            device_map="auto")
+
+        model = PeftModel.from_pretrained(
+            model,
+            loraWeights,
+            torch_type=torch.float16) 
        
     model.config.pad_token_id = tokenizer.pad_token_id = 0  # unk
     model.config.bos_token_id = 1
     model.config.eos_token_id = 2
 
     model.eval()
-    if torch.__version__ >= "2" and sys.platform != "win32":
+    if torch.__version__ >= "2":
         model = torch.compile(model)
     return model, tokenizer
 
@@ -56,6 +63,8 @@ def completion():
             stop=stop,)
             
         response = jsonify({
+            "errno" : 0,
+            "msg" : "success",
             "object": "text_completion",
             "choices" : [
                 {
@@ -72,13 +81,13 @@ def instruct():
 
 def getResponse(instruction, input, **kwargs):
     if instruction :
-        prompter = Prompter(promptTemplate)
+        prompter = Prompter("")
         prompt = prompter.generate_prompt(instruction, input)
     else:
         prompt = input
         
     inputs = tokenizer(prompt, return_tensors="pt")
-    inputIds = inputs["input_ids"].to(device)
+    inputIds = inputs["input_ids"].to("cuda")
     generationConfig = GenerationConfig(
         temperature=kwargs["temperature"],
         top_p=kwargs["topP"],
@@ -92,7 +101,7 @@ def getResponse(instruction, input, **kwargs):
             generation_config=generationConfig,
             return_dict_in_generate=True,
             output_scores=True,
-            max_new_tokens=maxNewTokens,
+            max_new_tokens=kwargs["maxTokens"],
         )
     s = generationOutput.sequences[0]
     output = tokenizer.decode(s)
@@ -102,11 +111,11 @@ def getResponse(instruction, input, **kwargs):
     else:
         return output
 
-def runApp(loraWeights):
-    assert(loraWeights)
-    
+def runApp(modelNameOrPath, loraWeights):
+    assert(modelNameOrPath)
+
     global model, tokenizer
-    model, tokenizer = initModel(loraWeights)
+    model, tokenizer = initModel(modelNameOrPath, loraWeights)
     
     app.run(debug = True)
 
