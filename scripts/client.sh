@@ -1,0 +1,1 @@
+python client/client.py --url=http://127.0.0.1:5000/v1/completions --prompt="讲一个笑话:"
