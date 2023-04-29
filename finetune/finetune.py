@@ -274,7 +274,7 @@ def main():
     model.save_pretrained(training_args.output_dir)
     
     logger.info("start_evaluating")
-    evaluate(args, dataset)
+    evaluate(trainer, args, dataset)
 
 if __name__ == "__main__":
     main()
