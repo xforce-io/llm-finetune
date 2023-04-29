@@ -87,7 +87,7 @@ def getResponse(instruction, input, **kwargs):
         prompter = Prompter("")
         prompt = prompter.generate_prompt(instruction, input)
     else:
-        prompt = {"text" : input}
+        prompt = [input]
         
     inputs = tokenizer(prompt, return_tensors="pt")
     inputIds = inputs["input_ids"].to("cuda")
