@@ -87,9 +87,9 @@ def getResponse(instruction, input, **kwargs):
         prompter = Prompter("")
         prompt = prompter.generate_prompt(instruction, input)
     else:
-        prompt = [input]
+        prompt = input
         
-    inputs = tokenizer(prompt, return_tensors="pt")
+    inputs = tokenizer(text=prompt, return_tensors="pt")
     inputIds = inputs["input_ids"].to("cuda")
     generationConfig = GenerationConfig(
         temperature=kwargs["temperature"],
