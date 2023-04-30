@@ -7,7 +7,8 @@
     "optimizer": {
         "type": "Adam",
         "params": {
-            "lr": 5e-5
+            "lr": 5e-4,
+            "weight_decay": 3e-7
         }
     },
     "scheduler": {
