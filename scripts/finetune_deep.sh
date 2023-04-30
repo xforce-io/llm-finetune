@@ -7,4 +7,5 @@ deepspeed --num_gpus=8 \
     --block_size 1024 \
     --do_train \
     --do_eval \
+    --logging_steps 100 \
     --output_dir output/checkpoint
