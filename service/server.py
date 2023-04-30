@@ -95,6 +95,7 @@ def getResponse(instruction, input, **kwargs):
     generationConfig = GenerationConfig(
         top_p=kwargs["topP"],
         top_k=kwargs["topK"],
+        num_beams=kNumBeams,
         **kwargs,
     )
 
