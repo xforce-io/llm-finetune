@@ -263,8 +263,6 @@ def main():
                 else None 
     )
 
-    logger.info("train_dataset_size[%d]" % dataset.train_dataset.length())
-
     if torch.__version__ >= "2":
         print("torch compile")
         model = torch.compile(model)
