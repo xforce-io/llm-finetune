@@ -10,5 +10,5 @@ deepspeed --num_gpus=8 \
     --weight_decay 1e-7 \
     --do_train \
     --do_eval \
-    --logging_steps 50 \
+    --logging_steps 10 \
     --output_dir output/checkpoint
