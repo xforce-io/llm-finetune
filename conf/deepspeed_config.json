@@ -1,6 +1,6 @@
 {
     "train_batch_size": 32,
-    "fp16": {
+    "bf16": {
         "enabled": true
     },
     "optimizer": {
