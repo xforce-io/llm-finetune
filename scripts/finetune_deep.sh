@@ -11,4 +11,7 @@ deepspeed --num_gpus=8 \
     --do_train \
     --do_eval \
     --logging_steps 10 \
-    --output_dir output/checkpoint
+    --output_dir output/checkpoint \
+    --save_steps 2000 \
+    --save_total_limit 3 \
+    --resume_from_checkpoint false
