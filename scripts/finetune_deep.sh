@@ -10,6 +10,7 @@ deepspeed --num_gpus=8 \
     --weight_decay 1e-4 \
     --do_train \
     --do_eval \
+    --num_train_epochs 3 \
     --logging_steps 10 \
     --output_dir output/checkpoint \
     --save_steps 2000 \
