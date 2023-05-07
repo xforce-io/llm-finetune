@@ -7,7 +7,7 @@
         "type": "Adam",
         "params": {
             "lr": 5e-5,
-            "weight_decay": 3e-7
+            "weight_decay": 1e-4
         }
     },
     "scheduler": {
