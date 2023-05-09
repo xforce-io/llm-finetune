@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Optional
 from transformers import MODEL_FOR_CAUSAL_LM_MAPPING, TrainingArguments
+from transformers.deepspeed import HfTrainerDeepSpeedConfig
 
 MODEL_CONFIG_CLASSES = list(MODEL_FOR_CAUSAL_LM_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
@@ -173,8 +174,9 @@ class Args:
         self.data_args = data_args
         self.training_args = training_args
         self.training_args.deepspeed = data_args.deepspeed_config
-        self.training_args.hf_deepspeed_config = data_args.deepspeed_config
+        self.training_args.hf_deepspeed_config = HfTrainerDeepSpeedConfig(data_args.deepspeed_config)
         self.training_args.remove_unused_columns = False
+        self.training_args.warmup_steps = 1000
 
     def model_args(self) -> ModelArguments:
         return self.model_args
