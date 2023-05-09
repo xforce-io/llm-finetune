@@ -172,6 +172,7 @@ class Args:
         self.model_args = model_args
         self.data_args = data_args
         self.training_args = training_args
+        self.training_args.deepspeed = data_args.deepspeed_config
         self.training_args.hf_deepspeed_config = data_args.deepspeed_config
         self.training_args.remove_unused_columns = False
 
