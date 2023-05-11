@@ -2,22 +2,22 @@ import transformers
 from transformers.testing_utils import CaptureLogger
 from datasets import load_dataset
 from itertools import chain
-from logger import logger
+from pretrain.logger import logger
 
 class Dataset:
     def __init__(self) -> None:
         pass
 
-    def set_train_dataset(self, train_dataset, data_args) -> None:
+    def set_train_dataset(self, train_dataset, dataArgs) -> None:
         self.train_dataset = train_dataset
-        if data_args.max_train_samples is not None:
-            max_train_samples = min(len(train_dataset), data_args.max_train_samples)
+        if dataArgs.max_train_samples is not None:
+            max_train_samples = min(len(train_dataset), dataArgs.max_train_samples)
             self.train_dataset = train_dataset.select(range(max_train_samples))
 
-    def set_eval_dataset(self, eval_dataset, data_args) -> None:
+    def set_eval_dataset(self, eval_dataset, dataArgs) -> None:
         self.eval_dataset = eval_dataset
-        if data_args.max_eval_samples is not None:
-            max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
+        if dataArgs.max_eval_samples is not None:
+            max_eval_samples = min(len(eval_dataset), dataArgs.max_eval_samples)
             self.eval_dataset = eval_dataset.select(range(max_eval_samples))
 
     def train_dataset(self):
@@ -26,7 +26,7 @@ class Dataset:
     def eval_dataset(self):
         return self.eval_dataset
 
-def loadDataset(data_args, model_args) :
+def loadDataset(dataArgs, modelArgs) :
     # Get the datasets: you can either provide your own CSV/JSON/TXT training and evaluation files (see below)
     # or just provide the name of one of the public datasets available on the hub at https://huggingface.co/datasets/
     # (the dataset will be downloaded automatically from the datasets Hub).
@@ -38,23 +38,23 @@ def loadDataset(data_args, model_args) :
     # download the dataset.
     data_files = {}
     dataset_args = {}
-    if data_args.train_file is not None:
-        data_files["train"] = data_args.train_file
-    if data_args.validation_file is not None:
-        data_files["validation"] = data_args.validation_file
+    if dataArgs.train_file is not None:
+        data_files["train"] = dataArgs.train_file
+    if dataArgs.validation_file is not None:
+        data_files["validation"] = dataArgs.validation_file
     extension = (
-        data_args.train_file.split(".")[-1]
-        if data_args.train_file is not None
-        else data_args.validation_file.split(".")[-1]
+        dataArgs.train_file.split(".")[-1]
+        if dataArgs.train_file is not None
+        else dataArgs.validation_file.split(".")[-1]
     )
     if extension == "txt":
         extension = "text"
-        dataset_args["keep_linebreaks"] = data_args.keep_linebreaks
+        dataset_args["keep_linebreaks"] = dataArgs.keep_linebreaks
     raw_datasets = load_dataset(
         extension,
         data_files=data_files,
-        cache_dir=model_args.cache_dir,
-        use_auth_token=True if model_args.use_auth_token else None,
+        cache_dir=modelArgs.cache_dir,
+        use_auth_token=True if modelArgs.use_auth_token else None,
         **dataset_args,
     )
     # If no validation data is there, validation_split_percentage will be used to divide the dataset.
@@ -62,23 +62,23 @@ def loadDataset(data_args, model_args) :
         raw_datasets["validation"] = load_dataset(
             extension,
             data_files=data_files,
-            split=f"train[:{data_args.validation_split_percentage}%]",
-            cache_dir=model_args.cache_dir,
-            use_auth_token=True if model_args.use_auth_token else None,
+            split=f"train[:{dataArgs.validation_split_percentage}%]",
+            cache_dir=modelArgs.cache_dir,
+            use_auth_token=True if modelArgs.use_auth_token else None,
             **dataset_args,
         )
         raw_datasets["train"] = load_dataset(
             extension,
             data_files=data_files,
-            split=f"train[{data_args.validation_split_percentage}%:]",
-            cache_dir=model_args.cache_dir,
-            use_auth_token=True if model_args.use_auth_token else None,
+            split=f"train[{dataArgs.validation_split_percentage}%:]",
+            cache_dir=modelArgs.cache_dir,
+            use_auth_token=True if modelArgs.use_auth_token else None,
             **dataset_args,
         )
     return raw_datasets
 
-def tokenizeDataset(training_args, data_args, tokenizer, raw_datasets):
-    if training_args.do_train:
+def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
+    if trainArgs.do_train:
         column_names = list(raw_datasets["train"].features)
     else:
         column_names = list(raw_datasets["validation"].features)
@@ -98,14 +98,14 @@ def tokenizeDataset(training_args, data_args, tokenizer, raw_datasets):
             )
         return output
 
-    with training_args.main_process_first(desc="dataset map tokenization"):
-        if not data_args.streaming:
+    with trainArgs.main_process_first(desc="dataset map tokenization"):
+        if not dataArgs.streaming:
             tokenized_datasets = raw_datasets.map(
                 tokenize_function,
                 batched=True,
-                num_proc=data_args.preprocessing_num_workers,
+                num_proc=dataArgs.preprocessing_num_workers,
                 remove_columns=column_names,
-                load_from_cache_file=not data_args.overwrite_cache,
+                load_from_cache_file=not dataArgs.overwrite_cache,
                 desc="Running tokenizer on dataset",
             )
         else:
@@ -143,7 +143,7 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
         result["labels"] = result["input_ids"].copy()
         return result
 
-    if args.data_args.block_size is None:
+    if args.dataArgs.block_size is None:
         block_size = tokenizer.model_max_length
         if block_size > 1024:
             logger.warning(
@@ -153,20 +153,20 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
             )
             block_size = 1024
     else:
-        if args.data_args.block_size > tokenizer.model_max_length:
+        if args.dataArgs.block_size > tokenizer.model_max_length:
             logger.warning(
-                f"The block_size passed ({args.data_args.block_size}) is larger than the maximum length for the model"
+                f"The block_size passed ({args.dataArgs.block_size}) is larger than the maximum length for the model"
                 f"({tokenizer.model_max_length}). Using block_size={tokenizer.model_max_length}."
             )
-        block_size = min(args.data_args.block_size, tokenizer.model_max_length)
+        block_size = min(args.dataArgs.block_size, tokenizer.model_max_length)
 
-    with args.training_args.main_process_first(desc="grouping texts together"):
-        if not args.data_args.streaming:
+    with args.trainArgs.main_process_first(desc="grouping texts together"):
+        if not args.dataArgs.streaming:
             lm_datasets = tokenized_datasets.map(
                 group_texts,
                 batched=True,
-                num_proc=args.data_args.preprocessing_num_workers,
-                load_from_cache_file=not args.data_args.overwrite_cache,
+                num_proc=args.dataArgs.preprocessing_num_workers,
+                load_from_cache_file=not args.dataArgs.overwrite_cache,
                 desc=f"Grouping texts in chunks of {block_size}",
             )
         else:
@@ -176,14 +176,14 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
             )
     
     dataset = Dataset()
-    if args.training_args.do_train:
+    if args.trainArgs.do_train:
         if "train" not in tokenized_datasets:
             raise ValueError("--do_train requires a train dataset")
-        dataset.set_train_dataset(lm_datasets["train"], args.data_args)
+        dataset.set_train_dataset(lm_datasets["train"], args.dataArgs)
 
-    if args.training_args.do_eval:
+    if args.trainArgs.do_eval:
         if "validation" not in tokenized_datasets:
             raise ValueError("--do_eval requires a validation dataset")
-        dataset.set_eval_dataset(lm_datasets["validation"], args.data_args)
+        dataset.set_eval_dataset(lm_datasets["validation"], args.dataArgs)
     return dataset
 

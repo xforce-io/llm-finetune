@@ -1,12 +1,12 @@
+from transformers import MODEL_FOR_CAUSAL_LM_MAPPING
+import dataclasses
 from dataclasses import dataclass, field
 from typing import Optional
-from transformers import MODEL_FOR_CAUSAL_LM_MAPPING, TrainingArguments
-from transformers.deepspeed import HfTrainerDeepSpeedConfig
 
 MODEL_CONFIG_CLASSES = list(MODEL_FOR_CAUSAL_LM_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
-@dataclass
+@dataclass(init=False)
 class ModelArguments:
     """
     Arguments pertaining to which model/config/tokenizer we are going to fine-tune, or train from scratch.
@@ -80,6 +80,12 @@ class ModelArguments:
         },
     )
 
+    def __init__(self, **kwargs):
+        names = set([f.name for f in dataclasses.fields(self)])
+        for k, v in kwargs.items():
+            if k in names:
+                setattr(self, k, v)
+
     def __post_init__(self):
         if self.config_overrides is not None and (self.config_name is not None or self.model_name_or_path is not None):
             raise ValueError(
@@ -87,8 +93,8 @@ class ModelArguments:
             )
 
 
-@dataclass
-class DataTrainingArguments:
+@dataclass(init=False)
+class DataArguments:
     """
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
@@ -154,6 +160,12 @@ class DataTrainingArguments:
         metadata={"help": "Filepath of deepspeed config."},
     )
 
+    def __init__(self, **kwargs):
+        names = set([f.name for f in dataclasses.fields(self)])
+        for k, v in kwargs.items():
+            if k in names:
+                setattr(self, k, v)
+        
     def __post_init__(self):
         if self.streaming:
             require_version("datasets>=2.0.0", "The streaming feature requires `datasets>=2.0.0`")
@@ -167,23 +179,4 @@ class DataTrainingArguments:
             if self.validation_file is not None:
                 extension = self.validation_file.split(".")[-1]
                 assert extension in ["csv", "json", "txt"], "`validation_file` should be a csv, a json or a txt file."
-
-class Args:
-    def __init__(self, model_args, data_args, training_args) -> None:
-        self.model_args = model_args
-        self.data_args = data_args
-        self.training_args = training_args
-        self.training_args.deepspeed = data_args.deepspeed_config
-        self.training_args.hf_deepspeed_config = HfTrainerDeepSpeedConfig(data_args.deepspeed_config)
-        self.training_args.remove_unused_columns = False
-        self.training_args.warmup_steps = 1000
-
-    def model_args(self) -> ModelArguments:
-        return self.model_args
-
-    def data_args(self) -> DataTrainingArguments:
-        return self.data_args
-    
-    def training_args(self) -> TrainingArguments:
-        return self.training_args
 
