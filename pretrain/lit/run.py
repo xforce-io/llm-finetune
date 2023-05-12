@@ -29,8 +29,8 @@ class DataModule(LightningDataModule):
 
         logger.info("start_make_dataset")
         self.dataset = makeDataset(tokenizer, args, tokenized_datasets)
-        self.trainDataloader = DataLoader(self.dataset.train_dataset)
-        self.evalDataloader = DataLoader(self.dataset.eval_dataset)
+        self.trainDataloader = DataLoader(self.dataset.train_dataset, batch_size=args.trainArgs.train_batch_size)
+        self.evalDataloader = DataLoader(self.dataset.eval_dataset, batch_size=args.trainArgs.train_batch_size)
 
     def train_dataloader(self):
         return self.trainDataloader
@@ -57,13 +57,17 @@ class LlmModule(LightningModule):
 
 def cli_main():
     args = ArgsLit()
+
+    deepspeedStrategy = DeepSpeedStrategy(config=args.dataArgs.deepspeed_config)
+    args.trainArgs.train_batch_size = deepspeedStrategy.config["train_batch_size"]
+    
     dataModule = DataModule(args)
     llmModule = LlmModule(loadPretrain(args.modelArgs), args.modelArgs)
     trainer = Trainer(
         max_epochs=args.trainArgs.num_train_epochs,
         accelerator="auto",
-        devices=8 if torch.cuda.is_available() else None,
-        strategy=DeepSpeedStrategy(config=args.dataArgs.deepspeed_config))
+        devices=1 if torch.cuda.is_available() else None,
+        strategy=deepspeedStrategy)
     trainer.fit(llmModule, datamodule=dataModule)
     trainer.test(
         model=llmModule,

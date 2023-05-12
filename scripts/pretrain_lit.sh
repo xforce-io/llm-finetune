@@ -6,4 +6,5 @@ python pretrain/lit/run.py \
         model_name_or_path="bigscience/bloom-560m" \
         block_size=1024 \
         num_train_epochs=2 \
-        do_train=true
+        do_train=true \
+        do_eval=true
