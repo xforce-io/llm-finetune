@@ -5,4 +5,5 @@ python pretrain/lit/run.py \
         validation_file="data/sample_eval.txt" \
         model_name_or_path="bigscience/bloom-560m" \
         block_size=1024 \
-        num_train_epochs=2
+        num_train_epochs=2 \
+        do_train=true

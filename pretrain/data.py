@@ -20,12 +20,6 @@ class Dataset:
             max_eval_samples = min(len(eval_dataset), dataArgs.max_eval_samples)
             self.eval_dataset = eval_dataset.select(range(max_eval_samples))
 
-    def train_dataset(self):
-        return self.train_dataset
-    
-    def eval_dataset(self):
-        return self.eval_dataset
-
 def loadDataset(dataArgs, modelArgs) :
     # Get the datasets: you can either provide your own CSV/JSON/TXT training and evaluation files (see below)
     # or just provide the name of one of the public datasets available on the hub at https://huggingface.co/datasets/
