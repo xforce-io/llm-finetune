@@ -14,6 +14,20 @@ from pretrain.logger import logger
 from pretrain.lit.args_lit import ArgsLit
 from pretrain.load_pretrain import loadTokenizer, loadPretrain
 
+def customCollate(data) :
+    inputIds = []
+    attentionMask = []
+    labels = []
+    for item in data:
+        inputIds += [item["input_ids"]]
+        attentionMask += [item["attention_mask"]]
+        labels += [item["labels"]]
+    return {
+        "input_ids" : inputIds,
+        "attention_mask" : attentionMask,
+        "labels" : labels
+}
+
 class DataModule(LightningDataModule):
     def __init__(self, args):
         super().__init__()
@@ -29,8 +43,14 @@ class DataModule(LightningDataModule):
 
         logger.info("start_make_dataset")
         self.dataset = makeDataset(tokenizer, args, tokenized_datasets)
-        self.trainDataloader = DataLoader(self.dataset.train_dataset, batch_size=args.trainArgs.train_batch_size)
-        self.evalDataloader = DataLoader(self.dataset.eval_dataset, batch_size=args.trainArgs.train_batch_size)
+        self.trainDataloader = DataLoader(
+            self.dataset.train_dataset, 
+            batch_size=args.trainArgs.train_batch_size,
+            collate_fn=customCollate)
+        self.evalDataloader = DataLoader(
+            self.dataset.eval_dataset, 
+            batch_size=args.trainArgs.train_batch_size,
+            collate_fn=customCollate)
 
     def train_dataloader(self):
         return self.trainDataloader
