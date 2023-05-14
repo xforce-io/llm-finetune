@@ -77,6 +77,9 @@ class LlmModule(LightningModule):
     def configure_optimizers(self):
         return DeepSpeedCPUAdam(self.parameters())
 
+    def save_pretrained(self, outputDir):
+        self.model.save_pretrained(outputDir)
+
 def cli_main():
     args = ArgsLit()
 
@@ -94,8 +97,8 @@ def cli_main():
     trainer.test(
         model=llmModule,
         dataLoaders=dataModule.val_dataloader(),
-        ckpt_path=args.trainArgs.output_dir, 
         datamodule=dataModule)
+    llmModule.save_pretrained(args.trainArgs.output_dir)
 
 if __name__ == "__main__":
     cli_main()

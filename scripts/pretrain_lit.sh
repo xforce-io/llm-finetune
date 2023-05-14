@@ -12,5 +12,6 @@ lightning run model pretrain/lit/run.py \
         model_name_or_path="bigscience/bloom-560m" \
         block_size=1024 \
         num_train_epochs=2 \
+        output_dir="output/checkpoint" \
         do_train=true \
         do_eval=true
