@@ -87,8 +87,8 @@ def cli_main():
     args.trainArgs.train_micro_batch_size_per_gpu = deepspeedStrategy.config["train_micro_batch_size_per_gpu"]
     
     dataModule = DataModule(args)
-    compiledModule = torch.compile(loadPretrain(args.modelArgs))
-    llmModule = LlmModule(compiledModule, args.modelArgs)
+    model = loadPretrain(args.modelArgs)
+    llmModule = LlmModule(model, args.modelArgs)
     
     trainer = Trainer(
         max_epochs=args.trainArgs.num_train_epochs,
@@ -98,7 +98,7 @@ def cli_main():
     trainer.fit(llmModule, datamodule=dataModule)
     trainer.test(
         model=llmModule,
-        dataLoaders=dataModule.val_dataloader(),
+        dataloaders=dataModule.val_dataloader(),
         datamodule=dataModule)
     llmModule.save_pretrained(args.trainArgs.output_dir)
 
