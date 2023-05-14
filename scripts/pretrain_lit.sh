@@ -3,9 +3,9 @@ export MASTER_ADDR=localhost
 export MASTER_PORT=12314
 
 lightning run model pretrain/lit/run.py \
-        --precision bf16 \
+        --precision bf16-mixed \
         --devices 8 \
-        accumulate_grad_batches=2 \
+        accumulate_grad_batches=4 \
         deepspeed_config="conf/deepspeed_config.json" \
         train_file="data/sample_train.txt" \
         validation_file="data/sample_eval.txt" \

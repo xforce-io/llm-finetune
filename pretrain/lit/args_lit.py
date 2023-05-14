@@ -8,11 +8,11 @@ from typing import Optional
 @dataclass(init=False)
 class TrainingArgumentsLit(TrainingArguments):
 
-    train_batch_size: Optional[int] = field(
+    train_micro_batch_size_per_gpu: Optional[int] = field(
         default=None,
         metadata={
             "help": (
-                "data batch size."
+                "train micro batch size per gpu."
             )
         },
     )

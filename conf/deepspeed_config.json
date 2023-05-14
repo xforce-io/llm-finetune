@@ -1,5 +1,5 @@
 {
-    "train_batch_size": 4,
+    "train_batch_size": 128,
     "train_micro_batch_size_per_gpu": 4,
     "bf16": {
         "enabled": true
@@ -20,7 +20,7 @@
         }
     },
     "zero_optimization": {
-        "stage": 1
+        "stage": 2
     },
     "wall_clock_breakdown": true
 }
