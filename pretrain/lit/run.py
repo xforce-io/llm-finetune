@@ -81,7 +81,7 @@ def cli_main():
     args = ArgsLit()
 
     deepspeedStrategy = DeepSpeedStrategy(config=args.dataArgs.deepspeed_config)
-    args.trainArgs.train_batch_size = deepspeedStrategy.config["train_batch_size"]
+    args.trainArgs.train_micro_batch_size_per_gpu = deepspeedStrategy.config["train_micro_batch_size_per_gpu"]
     
     dataModule = DataModule(args)
     llmModule = LlmModule(loadPretrain(args.modelArgs), args.modelArgs)
