@@ -88,14 +88,16 @@ def cli_main():
     
     dataModule = DataModule(args)
     llmModule = LlmModule(loadPretrain(args.modelArgs), args.modelArgs)
+    compiledModule = torch.compile(llmModule)
+    
     trainer = Trainer(
         max_epochs=args.trainArgs.num_train_epochs,
         accelerator="auto",
         accumulate_grad_batches=args.trainArgs.accumulate_grad_batches,
         strategy=deepspeedStrategy)
-    trainer.fit(llmModule, datamodule=dataModule)
+    trainer.fit(compiledModule, datamodule=dataModule)
     trainer.test(
-        model=llmModule,
+        model=compiledModule,
         dataLoaders=dataModule.val_dataloader(),
         datamodule=dataModule)
     llmModule.save_pretrained(args.trainArgs.output_dir)
