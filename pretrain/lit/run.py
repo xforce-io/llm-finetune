@@ -23,9 +23,9 @@ def customCollate(data) :
         attentionMask += [item["attention_mask"]]
         labels += [item["labels"]]
     return {
-        "input_ids" : inputIds,
-        "attention_mask" : attentionMask,
-        "labels" : labels
+        "input_ids" : torch.LongTensor(inputIds),
+        "attention_mask" : torch.LongTensor(attentionMask),
+        "labels" : torch.LongTensor(labels)
 }
 
 class DataModule(LightningDataModule):
