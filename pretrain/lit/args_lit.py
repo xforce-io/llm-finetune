@@ -29,6 +29,7 @@ class ArgsLit:
         self.modelArgs = ModelArguments(**data)
         self.dataArgs = DataArguments(**data)
         self.trainArgs = TrainingArgumentsLit(**data)
+        self.trainArgs.deepspeed = self.dataArgs.deepspeed_config
 
 if __name__ == "__main__":
     argLit = ArgsLit()
