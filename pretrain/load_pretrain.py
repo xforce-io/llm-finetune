@@ -54,7 +54,7 @@ def loadPretrain(modelArgs :ModelArguments) :
             else getattr(torch, modelArgs.torch_dtype)
         )
 
-        MAX_MEM_PER_GPU = "78GB"
+        MAX_MEM_PER_GPU = "80GB"
         max_mem = {}
         for i in range(8):
             max_mem[i] = MAX_MEM_PER_GPU

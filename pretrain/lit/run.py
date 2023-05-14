@@ -46,11 +46,13 @@ class DataModule(LightningDataModule):
         self.trainDataloader = DataLoader(
             self.dataset.train_dataset, 
             batch_size=args.trainArgs.train_batch_size,
-            collate_fn=customCollate)
+            collate_fn=customCollate,
+            shuffle=True)
         self.evalDataloader = DataLoader(
             self.dataset.eval_dataset, 
             batch_size=args.trainArgs.train_batch_size,
-            collate_fn=customCollate)
+            collate_fn=customCollate,
+            shuffle=True)
 
     def train_dataloader(self):
         return self.trainDataloader
