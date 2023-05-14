@@ -16,6 +16,15 @@ class TrainingArgumentsLit(TrainingArguments):
         },
     )
 
+    accumulate_grad_batches: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": (
+                "accumulate grad batches."
+            )
+        },
+    )
+
     def __init__(self, **kwargs):
         names = set([f.name for f in dataclasses.fields(self)])
         for k, v in kwargs.items():

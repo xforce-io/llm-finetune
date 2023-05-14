@@ -86,7 +86,7 @@ def cli_main():
     trainer = Trainer(
         max_epochs=args.trainArgs.num_train_epochs,
         accelerator="auto",
-        devices=1 if torch.cuda.is_available() else None,
+        accumulate_grad_batches=args.trainArgs.accumulate_grad_batches,
         strategy=deepspeedStrategy)
     trainer.fit(llmModule, datamodule=dataModule)
     trainer.test(

@@ -1,5 +1,11 @@
+export RANK=0
+export MASTER_ADDR=localhost
+export MASTER_PORT=12314
+
 python pretrain/lit/run.py \
-        --precision 16 \
+        --precision bf16 \
+        --devices 8 \
+        accumulate_grad_batches=2 \
         deepspeed_config="conf/deepspeed_config.json" \
         train_file="data/sample_train.txt" \
         validation_file="data/sample_eval.txt" \
