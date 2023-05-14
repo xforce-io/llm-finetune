@@ -2,9 +2,10 @@ from omegaconf import OmegaConf
 from pretrain.args import ModelArguments, DataArguments
 from transformers import TrainingArguments
 import dataclasses
-from dataclasses import field
+from dataclasses import dataclass, field
 from typing import Optional
 
+@dataclass(init=False)
 class TrainingArgumentsLit(TrainingArguments):
 
     train_batch_size: Optional[int] = field(
