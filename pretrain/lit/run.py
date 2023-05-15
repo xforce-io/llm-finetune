@@ -47,11 +47,13 @@ class DataModule(LightningDataModule):
             self.dataset.train_dataset, 
             collate_fn=customCollate,
             batch_size=args.trainArgs.train_micro_batch_size_per_gpu,
+            num_workers=args.dataArgs.preprocessing_num_workers,
             shuffle=True)
         self.evalDataloader = DataLoader(
             self.dataset.eval_dataset, 
             collate_fn=customCollate,
-            batch_size=args.trainArgs.train_micro_batch_size_per_gpu)
+            batch_size=args.trainArgs.train_micro_batch_size_per_gpu,
+            num_workers=args.dataArgs.preprocessing_num_workers)
 
     def train_dataloader(self):
         return self.trainDataloader
