@@ -71,8 +71,12 @@ class LlmModule(LightningModule):
 
     def training_step(self, batch, batch_idx):
         outputs = self(**batch)
+        return outputs[0]
+
+    def test_step(self, batch, batch_idx):
+        outputs = self(**batch)
         loss = outputs[0]
-        return loss
+        self.log("test_loss", loss)
 
     def configure_optimizers(self):
         return DeepSpeedCPUAdam(self.parameters())
