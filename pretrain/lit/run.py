@@ -96,10 +96,7 @@ def cli_main():
         accumulate_grad_batches=args.trainArgs.accumulate_grad_batches,
         strategy=deepspeedStrategy)
     trainer.fit(llmModule, datamodule=dataModule)
-    trainer.test(
-        model=llmModule,
-        dataloaders=dataModule.val_dataloader(),
-        datamodule=dataModule)
+    trainer.test(model=llmModule, datamodule=dataModule)
     llmModule.save_pretrained(args.trainArgs.output_dir)
 
 if __name__ == "__main__":
