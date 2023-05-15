@@ -73,10 +73,10 @@ class LlmModule(LightningModule):
         outputs = self(**batch)
         return outputs[0]
 
-    def test_step(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx):
         outputs = self(**batch)
         loss = outputs[0]
-        self.log("test_loss", loss)
+        self.log("validation_loss", loss)
 
     def configure_optimizers(self):
         return DeepSpeedCPUAdam(self.parameters())
@@ -100,7 +100,7 @@ def cli_main():
         accumulate_grad_batches=args.trainArgs.accumulate_grad_batches,
         strategy=deepspeedStrategy)
     trainer.fit(llmModule, datamodule=dataModule)
-    trainer.test(model=llmModule, datamodule=dataModule)
+    trainer.validation(model=llmModule, datamodule=dataModule)
     llmModule.save_pretrained(args.trainArgs.output_dir)
 
 if __name__ == "__main__":
