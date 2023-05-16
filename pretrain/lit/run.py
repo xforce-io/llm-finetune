@@ -5,6 +5,8 @@ from torch import optim
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from pytorch_lightning.strategies import DeepSpeedStrategy
 from deepspeed.ops.adam import DeepSpeedCPUAdam
+from lightning import Fabric
+import lightning as L
 
 import sys
 sys.path.append("./")
@@ -87,7 +89,7 @@ class LlmModule(LightningModule):
     def save_pretrained(self, outputDir):
         self.model.save_pretrained(outputDir)
 
-def cli_main():
+def trainerMain():
     args = ArgsLit()
 
     deepspeedStrategy = DeepSpeedStrategy(config=args.dataArgs.deepspeed_config)
@@ -107,5 +109,60 @@ def cli_main():
     trainer.validate(model=llmModule, datamodule=dataModule)
     llmModule.save_pretrained(args.trainArgs.output_dir)
 
+def fabricTrain(
+        args,
+        dataModule, 
+        model, 
+        optimizer,
+        fabric):
+    dataloader = fabric.setup_dataloaders(dataModule.train_dataloader)
+    model.train()
+    for epoch in range(args.trainArgs.num_train_epochs):
+        i = 0
+        for batch in dataloader:
+            if i % len(dataloader) == 0:
+                fabricEval(dataModule, model, fabric)
+                
+            optimizer.zero_grad()
+            outputs = model(**batch)
+            loss = outputs[0]
+
+            print("train loss[%f]" % loss)
+
+            fabric.backward(loss)
+            optimizer.step()
+
+def fabricEval(
+        dataModule,
+        model,
+        fabric):
+    dataloader = fabric.setup_dataloaders(dataModule.val_dataloader)
+    model.eval()
+    with torch.no_grad():
+        for batch in dataloader:
+            outputs = model(**batch)
+            loss = outputs[0]
+        print("eval loss[%f]" % loss)
+
+def fabricMain():
+    args = ArgsLit()
+
+    deepspeedStrategy = DeepSpeedStrategy(
+        config=args.dataArgs.deepspeed_config)
+    args.trainArgs.train_micro_batch_size_per_gpu = deepspeedStrategy.config["train_micro_batch_size_per_gpu"]
+
+    fabric = L.Fabric(
+        accelerator="cuda", 
+        strategy=deepspeedStrategy)
+    fabric.launch()
+    
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+
+    dataModule = DataModule(args)
+    model = loadPretrain(args.modelArgs)
+    model, optimizer = fabric.setup(model, optimizer)
+    
+    fabricTrain(args, dataModule, model, optimizer, fabric)
+
 if __name__ == "__main__":
-    cli_main()
+    fabricMain()
