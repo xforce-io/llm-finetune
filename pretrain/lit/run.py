@@ -158,7 +158,7 @@ def fabricMain():
     
     dataModule = DataModule(args)
     model = loadPretrain(args.modelArgs)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+    optimizer = torch.optim.Adam(model.parameters(), lr=5e-5)
     model, optimizer = fabric.setup(model, optimizer)
     
     fabricTrain(args, dataModule, model, optimizer, fabric)
