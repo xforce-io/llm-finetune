@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 from torch import optim
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
-from pytorch_lightning.strategies import DeepSpeedStrategy
+from lightning.fabric.strategies import DeepSpeedStrategy
 from deepspeed.ops.adam import DeepSpeedCPUAdam
 from lightning import Fabric
 import lightning as L
