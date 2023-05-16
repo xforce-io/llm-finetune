@@ -101,7 +101,8 @@ def cli_main():
         max_epochs=args.trainArgs.num_train_epochs,
         accelerator="auto",
         accumulate_grad_batches=args.trainArgs.accumulate_grad_batches,
-        strategy=deepspeedStrategy)
+        strategy=deepspeedStrategy,
+        val_check_interval=0.05)
     trainer.fit(llmModule, datamodule=dataModule)
     trainer.validate(model=llmModule, datamodule=dataModule)
     llmModule.save_pretrained(args.trainArgs.output_dir)
