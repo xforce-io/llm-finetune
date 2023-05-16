@@ -154,7 +154,6 @@ def fabricMain():
     fabric = L.Fabric(
         accelerator="cuda", 
         strategy=deepspeedStrategy)
-    fabric.launch()
     
     dataModule = DataModule(args)
     model = loadPretrain(args.modelArgs)
