@@ -16,20 +16,6 @@ from pretrain.data import DataModule
 from pretrain.lit.args_lit import ArgsLit
 from pretrain.load_pretrain import loadPretrain
 
-def customCollate(data) :
-    inputIds = []
-    attentionMask = []
-    labels = []
-    for item in data:
-        inputIds += [item["input_ids"]]
-        attentionMask += [item["attention_mask"]]
-        labels += [item["labels"]]
-    return {
-        "input_ids" : torch.LongTensor(inputIds),
-        "attention_mask" : torch.LongTensor(attentionMask),
-        "labels" : torch.LongTensor(labels)
-}
-
 class FabricTrainer:
     def __init__(self) -> None:
         self.args = ArgsLit()

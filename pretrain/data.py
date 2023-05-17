@@ -1,3 +1,4 @@
+import torch
 import transformers
 from transformers.testing_utils import CaptureLogger
 from datasets import load_dataset
@@ -181,7 +182,23 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
         dataset.set_eval_dataset(lm_datasets["validation"], args.dataArgs)
     return dataset
 
+from torch.utils.data import DataLoader
 from pytorch_lightning import LightningDataModule
+from pretrain.load_pretrain import loadTokenizer
+
+def customCollate(data) :
+    inputIds = []
+    attentionMask = []
+    labels = []
+    for item in data:
+        inputIds += [item["input_ids"]]
+        attentionMask += [item["attention_mask"]]
+        labels += [item["labels"]]
+    return {
+        "input_ids" : torch.LongTensor(inputIds),
+        "attention_mask" : torch.LongTensor(attentionMask),
+        "labels" : torch.LongTensor(labels)
+}
 
 class DataModule(LightningDataModule):
     def __init__(self, args):
