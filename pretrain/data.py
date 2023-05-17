@@ -181,3 +181,37 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
         dataset.set_eval_dataset(lm_datasets["validation"], args.dataArgs)
     return dataset
 
+from pytorch_lightning import LightningDataModule
+
+class DataModule(LightningDataModule):
+    def __init__(self, args):
+        super().__init__()
+
+        logger.info("start_load_dataset")
+        raw_datasets = loadDataset(args.dataArgs, args.modelArgs)
+
+        logger.info("start_load_tokenizer")
+        tokenizer = loadTokenizer(args.modelArgs)
+
+        logger.info("start_tokenizer_dataset")
+        tokenized_datasets = tokenizeDataset(args.trainArgs, args.dataArgs, tokenizer, raw_datasets)
+
+        logger.info("start_make_dataset")
+        self.dataset = makeDataset(tokenizer, args, tokenized_datasets)
+        self.trainDataloader = DataLoader(
+            self.dataset.train_dataset, 
+            collate_fn=customCollate,
+            batch_size=args.trainArgs.train_micro_batch_size_per_gpu,
+            num_workers=args.dataArgs.preprocessing_num_workers,
+            shuffle=True)
+        self.evalDataloader = DataLoader(
+            self.dataset.eval_dataset, 
+            collate_fn=customCollate,
+            batch_size=args.trainArgs.train_micro_batch_size_per_gpu,
+            num_workers=args.dataArgs.preprocessing_num_workers)
+
+    def train_dataloader(self):
+        return self.trainDataloader
+
+    def val_dataloader(self):
+        return self.evalDataloader

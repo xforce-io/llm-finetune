@@ -2,21 +2,19 @@ import torch
 
 from typing import Any, Iterable
 
-from torch.utils.data import DataLoader
-from pytorch_lightning import LightningDataModule
 from lightning.fabric.strategies import DeepSpeedStrategy
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 import lightning as L
+from deepspeed.ops.adam import DeepSpeedCPUAdam
 
 from tqdm import tqdm
 
 import sys
 sys.path.append("./")
 
-from pretrain.data import loadDataset, tokenizeDataset, makeDataset
-from pretrain.logger import logger
+from pretrain.data import DataModule
 from pretrain.lit.args_lit import ArgsLit
-from pretrain.load_pretrain import loadTokenizer, loadPretrain
+from pretrain.load_pretrain import loadPretrain
 
 def customCollate(data) :
     inputIds = []
@@ -31,39 +29,6 @@ def customCollate(data) :
         "attention_mask" : torch.LongTensor(attentionMask),
         "labels" : torch.LongTensor(labels)
 }
-
-class DataModule(LightningDataModule):
-    def __init__(self, args):
-        super().__init__()
-
-        logger.info("start_load_dataset")
-        raw_datasets = loadDataset(args.dataArgs, args.modelArgs)
-
-        logger.info("start_load_tokenizer")
-        tokenizer = loadTokenizer(args.modelArgs)
-
-        logger.info("start_tokenizer_dataset")
-        tokenized_datasets = tokenizeDataset(args.trainArgs, args.dataArgs, tokenizer, raw_datasets)
-
-        logger.info("start_make_dataset")
-        self.dataset = makeDataset(tokenizer, args, tokenized_datasets)
-        self.trainDataloader = DataLoader(
-            self.dataset.train_dataset, 
-            collate_fn=customCollate,
-            batch_size=args.trainArgs.train_micro_batch_size_per_gpu,
-            num_workers=args.dataArgs.preprocessing_num_workers,
-            shuffle=True)
-        self.evalDataloader = DataLoader(
-            self.dataset.eval_dataset, 
-            collate_fn=customCollate,
-            batch_size=args.trainArgs.train_micro_batch_size_per_gpu,
-            num_workers=args.dataArgs.preprocessing_num_workers)
-
-    def train_dataloader(self):
-        return self.trainDataloader
-
-    def val_dataloader(self):
-        return self.evalDataloader
 
 class FabricTrainer:
     def __init__(self) -> None:
@@ -104,7 +69,7 @@ class FabricTrainer:
 
     def train(self):
         self.model = loadPretrain(self.args.modelArgs)
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=5e-5)
+        optimizer = DeepSpeedCPUAdam(self.model.parameters())
         self.model, self.optimizer = self.fabric.setup(self.model, optimizer)
         self._train()
 
