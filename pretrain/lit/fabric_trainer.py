@@ -91,7 +91,27 @@ class FabricTrainer:
         self.dataModule = DataModule(self.args)
         self.currentEpoch = 0
     
+    def eval(self):
+        dataloader = self.fabric.setup_dataloaders(self.dataModule.val_dataloader())
+        self.model.eval()
+
+        iterable = self._progBarWrapper(
+            dataloader,
+            total=len(dataloader),
+            desc=f"evaluation")
+        with torch.no_grad():
+            for batchIdx, batch in enumerate(iterable):
+                outputs = self.model(**batch)
+                loss = outputs[0]
+            print("eval loss[%f]" % loss)
+
     def train(self):
+        self.model = loadPretrain(self.args.modelArgs)
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=5e-5)
+        self.model, self.optimizer = self.fabric.setup(self.model, optimizer)
+        self._train()
+
+    def _train(self):
         dataloader = self.fabric.setup_dataloaders(self.dataModule.train_dataloader())
         self.model.train()
 
@@ -113,26 +133,6 @@ class FabricTrainer:
 
                 self.fabric.backward(loss)
                 self.optimizer.step()
-
-    def eval(self):
-        dataloader = self.fabric.setup_dataloaders(self.dataModule.val_dataloader())
-        self.model.eval()
-
-        iterable = self._progBarWrapper(
-            dataloader,
-            total=len(dataloader),
-            desc=f"evaluation")
-        with torch.no_grad():
-            for batchIdx, batch in enumerate(iterable):
-                outputs = self.model(**batch)
-                loss = outputs[0]
-            print("eval loss[%f]" % loss)
-
-    def train(self):
-        self.model = loadPretrain(self.args.modelArgs)
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=5e-5)
-        self.model, self.optimizer = self.fabric.setup(self.model, optimizer)
-        self.train()
 
     def _progBarWrapper(
             self, 
