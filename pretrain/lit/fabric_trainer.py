@@ -121,14 +121,12 @@ class FabricTrainer:
             desc=f"Trainning epochs {self.currentEpoch}")
         for epoch in range(self.args.trainArgs.num_train_epochs):
             for batchIdx, batch in enumerate(iterable):
-                if batchIdx % 10 == 0 and batchIdx != 0:
-                    self.eval()
-                    
                 self.optimizer.zero_grad()
                 outputs = self.model(**batch)
                 loss = outputs[0]
-
-                print("train loss[%f]" % loss)
+                if batchIdx % 1000 == 0 and batchIdx != 0:
+                    print("train loss[%f]" % loss)
+                    self.eval()
 
                 self.fabric.backward(loss)
                 self.optimizer.step()
