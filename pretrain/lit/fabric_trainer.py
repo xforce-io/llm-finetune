@@ -3,12 +3,8 @@ import torch
 from typing import Any, Iterable
 
 from torch.utils.data import DataLoader
-from torch import optim
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from lightning.fabric.strategies import DeepSpeedStrategy
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
-from deepspeed.ops.adam import DeepSpeedCPUAdam
-from lightning import Fabric
 import lightning as L
 
 from tqdm import tqdm
