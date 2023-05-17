@@ -121,7 +121,7 @@ class FabricTrainer:
             desc=f"Trainning epochs {self.currentEpoch}")
         for epoch in range(self.args.trainArgs.num_train_epochs):
             for batchIdx, batch in enumerate(iterable):
-                if batchIdx % 10 == 0:
+                if batchIdx % 10 == 0 and batchIdx != 0:
                     self.eval()
                     
                 self.optimizer.zero_grad()
