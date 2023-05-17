@@ -92,7 +92,7 @@ class FabricTrainer:
         self.currentEpoch = 0
     
     def train(self):
-        dataloader = self.fabric.setup_dataloaders(self.dataModule.train_dataloader)
+        dataloader = self.fabric.setup_dataloaders(self.dataModule.train_dataloader())
         self.model.train()
 
         iterable = self._progBarWrapper(
@@ -115,7 +115,7 @@ class FabricTrainer:
                 self.optimizer.step()
 
     def eval(self):
-        dataloader = self.fabric.setup_dataloaders(self.dataModule.val_dataloader)
+        dataloader = self.fabric.setup_dataloaders(self.dataModule.val_dataloader())
         self.model.eval()
 
         iterable = self._progBarWrapper(
