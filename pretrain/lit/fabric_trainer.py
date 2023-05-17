@@ -120,10 +120,9 @@ class FabricTrainer:
             total=len(dataloader),
             desc=f"Trainning epochs {self.currentEpoch}")
         for epoch in range(self.args.trainArgs.num_train_epochs):
-            i = 0
             for batchIdx, batch in enumerate(iterable):
-                if i % len(dataloader) == 0:
-                    self.eval(self.dataModule, self.model, fabric)
+                if batchIdx % 10 == 0:
+                    self.eval()
                     
                 self.optimizer.zero_grad()
                 outputs = self.model(**batch)
