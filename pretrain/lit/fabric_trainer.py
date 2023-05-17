@@ -38,46 +38,43 @@ class FabricTrainer:
  
         self.dataModule = DataModule(self.args)
         self.currentEpoch = 0
-    
-    def eval(self):
-        dataloader = self.fabric.setup_dataloaders(self.dataModule.val_dataloader())
-        self.model.eval()
+        self.trainDataloader, self.evalDataloader = self.fabric.setup_dataloaders(
+            self.dataModule.train_dataloader(),
+            self.dataModule.evalDataloader())
 
+    def fit(self):
+        self.model = loadPretrain(self.args.modelArgs)
+        optimizer = DeepSpeedCPUAdam(self.model.parameters())
+        self.model, self.optimizer = self.fabric.setup(self.model, optimizer)
+        for epoch in range(self.args.trainArgs.num_train_epochs):
+            self._trainStep()
+            self._evalStep()
+
+    def _trainStep(self):
+        self.model.train()
+        curLoss = None
         iterable = self._progBarWrapper(
-            dataloader,
-            total=len(dataloader),
+            self.trainDataloader,
+            total=len(self.trainDataloader),
+            desc=f"Trainning epochs {self.currentEpoch}/{curLoss}")
+        for batchIdx, batch in enumerate(iterable):
+            self.optimizer.zero_grad()
+            outputs = self.model(**batch)
+            curLoss = outputs[0]
+            self.fabric.backward(curLoss)
+            self.optimizer.step()
+
+    def _evalStep(self):
+        self.model.eval()
+        iterable = self._progBarWrapper(
+            self.evalDataloader,
+            total=len(self.evalDataloader),
             desc=f"evaluation")
         with torch.no_grad():
             for batchIdx, batch in enumerate(iterable):
                 outputs = self.model(**batch)
                 loss = outputs[0]
             print("eval loss[%f]" % loss)
-
-    def train(self):
-        self.model = loadPretrain(self.args.modelArgs)
-        optimizer = DeepSpeedCPUAdam(self.model.parameters())
-        self.model, self.optimizer = self.fabric.setup(self.model, optimizer)
-        self._train()
-
-    def _train(self):
-        dataloader = self.fabric.setup_dataloaders(self.dataModule.train_dataloader())
-        self.model.train()
-
-        iterable = self._progBarWrapper(
-            dataloader,
-            total=len(dataloader),
-            desc=f"Trainning epochs {self.currentEpoch}")
-        for epoch in range(self.args.trainArgs.num_train_epochs):
-            for batchIdx, batch in enumerate(iterable):
-                self.optimizer.zero_grad()
-                outputs = self.model(**batch)
-                loss = outputs[0]
-                if batchIdx % 1000 == 0 and batchIdx != 0:
-                    print("train loss[%f]" % loss)
-                    self.eval()
-
-                self.fabric.backward(loss)
-                self.optimizer.step()
 
     def _progBarWrapper(
             self, 
