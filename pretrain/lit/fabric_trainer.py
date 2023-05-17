@@ -3,6 +3,7 @@ import torch
 from typing import Any, Iterable
 
 from torch.utils.data import DataLoader
+from pytorch_lightning import LightningDataModule
 from lightning.fabric.strategies import DeepSpeedStrategy
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 import lightning as L
