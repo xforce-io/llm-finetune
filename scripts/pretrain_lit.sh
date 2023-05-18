@@ -14,5 +14,5 @@ lightning run model pretrain/lit/run.py \
         num_train_epochs=2 \
         output_dir="output/checkpoint" \
         do_train=true \
-        preprocessing_num_workers=10 \
+        preprocessing_num_workers=8 \
         do_eval=true

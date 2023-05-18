@@ -40,7 +40,7 @@ class FabricTrainer:
         self.currentEpoch = 0
         self.trainDataloader, self.evalDataloader = self.fabric.setup_dataloaders(
             self.dataModule.train_dataloader(),
-            self.dataModule.evalDataloader())
+            self.dataModule.val_dataloader())
 
     def fit(self):
         self.model = loadPretrain(self.args.modelArgs)
@@ -58,11 +58,12 @@ class FabricTrainer:
             total=len(self.trainDataloader),
             desc=f"Trainning epochs {self.currentEpoch}/{curLoss}")
         for batchIdx, batch in enumerate(iterable):
-            self.optimizer.zero_grad()
             outputs = self.model(**batch)
             curLoss = outputs[0]
             self.fabric.backward(curLoss)
+            self.clip_gradients(self.model, self.optimizer, clip_val=0.25)
             self.optimizer.step()
+            self.optimizer.zero_grad()
 
     def _evalStep(self):
         self.model.eval()
