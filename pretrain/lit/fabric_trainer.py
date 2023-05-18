@@ -61,7 +61,7 @@ class FabricTrainer:
             outputs = self.model(**batch)
             curLoss = outputs[0]
             self.fabric.backward(curLoss)
-            self.clip_gradients(self.model, self.optimizer, clip_val=0.25)
+            self.fabric.clip_gradients(self.model, self.optimizer, clip_val=0.25)
             self.optimizer.step()
             self.optimizer.zero_grad()
 
