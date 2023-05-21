@@ -50,7 +50,7 @@ def trainerMain():
         accelerator="auto",
         accumulate_grad_batches=args.trainArgs.accumulate_grad_batches,
         strategy=deepspeedStrategy,
-        val_check_interval=0.05)
+        val_check_interval=0.2)
     trainer.fit(llmModule, datamodule=dataModule)
     trainer.validate(model=llmModule, datamodule=dataModule)
     llmModule.save_pretrained(args.trainArgs.output_dir)
