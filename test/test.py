@@ -1,7 +1,7 @@
 import json
 from client.client import post_request
 
-kUrl = ""
+kUrl = "http://127.0.0.1:5000/v1/completions"
 kPathPclue = "benchmark/pclue/pclue.jsonl"
 
 def test(filepath):
