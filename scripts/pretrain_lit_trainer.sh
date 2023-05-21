@@ -2,7 +2,7 @@ export RANK=0
 export MASTER_ADDR=localhost
 export MASTER_PORT=12314
 
-lightning run model pretrain/lit/run_trainer.py \
+CUDA_LAUNCH_BLOCKING=1 lightning run model pretrain/lit/run_trainer.py \
         --precision bf16-mixed \
         --devices 8 \
         accumulate_grad_batches=2 \
