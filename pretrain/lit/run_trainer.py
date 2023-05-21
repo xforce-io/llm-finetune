@@ -1,6 +1,9 @@
+import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.strategies import DeepSpeedStrategy
 from deepspeed.ops.adam import DeepSpeedCPUAdam
+
+torch.cuda.device_count()
 
 import sys
 sys.path.append("./")
