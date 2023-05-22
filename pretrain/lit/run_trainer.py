@@ -27,13 +27,13 @@ class LlmModule(LightningModule):
     def training_step(self, batch, batch_idx):
         outputs = self(**batch)
         loss = outputs[0]
-        self.log("train_loss", loss, sync_dict=True)
+        self.log("train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         outputs = self(**batch)
         loss = outputs[0]
-        self.log("validation_loss", loss, sync_dict=True)
+        self.log("validation_loss", loss)
 
     def configure_optimizers(self):
         optimizer = Adam(
@@ -52,12 +52,12 @@ class LlmModule(LightningModule):
             optimizer,
             lr_lambda=lr_foo
         )
-        return optimizer, scheduler
+        return ([optimizer], [scheduler])
 
     def save_pretrained(self, outputDir):
         self.model.save_pretrained(outputDir)
 
-def makeDDPStrategy(*args):
+def makeDDPStrategy(args):
     strategy = DDPStrategy()
     return strategy
 
@@ -66,12 +66,10 @@ def makeDeepSpeedStrategy(args) :
     args.trainArgs.train_micro_batch_size_per_gpu = strategy.config["train_micro_batch_size_per_gpu"]
     return strategy
 
-def trainerMain(strategy):
-    args = ArgsLit()
-
+def trainerMain(args, strategy):
     dataModule = DataModule(args)
     model = loadPretrain(args.modelArgs)
-    llmModule = LlmModule(model, args.args)
+    llmModule = LlmModule(model, args)
     
     lrLogger = LearningRateMonitor(logging_interval="step")
     profiler = SimpleProfiler()
@@ -89,5 +87,6 @@ def trainerMain(strategy):
     llmModule.save_pretrained(args.trainArgs.output_dir)
 
 if __name__ == "__main__":
-    strategy = makeDDPStrategy()
-    trainerMain(strategy)
+    args = ArgsLit()
+    strategy = makeDDPStrategy(args)
+    trainerMain(args, strategy)
