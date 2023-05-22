@@ -26,6 +26,33 @@ class TrainingArgumentsLit(TrainingArguments):
         },
     )
 
+    warmup_min_lr: Optional[float] = field(
+        default=None,
+        metadata={
+            "help": (
+                "warmup min lr."
+            )
+        },
+    )
+
+    warmup_max_lr: Optional[float] = field(
+        default=None,
+        metadata={
+            "help": (
+                "warmup max lr."
+            )
+        },
+    )
+
+    warmup_num_steps: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": (
+                "warmup num steps."
+            )
+        },
+    )
+
     def __init__(self, **kwargs):
         names = set([f.name for f in dataclasses.fields(self)])
         for k, v in kwargs.items():
