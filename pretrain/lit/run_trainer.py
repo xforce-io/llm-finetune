@@ -1,6 +1,7 @@
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.strategies import DeepSpeedStrategy, DDPStrategy
+from deepspeed.ops.adam import DeepSpeedCPUAdam
 from pytorch_lightning.callbacks import LearningRateMonitor
 from lightning.pytorch.profilers.simple import SimpleProfiler
 from torch.optim import Adam
@@ -16,9 +17,10 @@ from pretrain.lit.args_lit import ArgsLit
 from pretrain.load_pretrain import loadPretrain
 
 class LlmModule(LightningModule):
-    def __init__(self, model, args):
+    def __init__(self, model, framework, args):
         super().__init__()
         self.model = model
+        self.framework = framework
         self.args = args
         
     def forward(self, **inputs):
@@ -36,8 +38,38 @@ class LlmModule(LightningModule):
         self.log("validation_loss", loss)
 
     def configure_optimizers(self):
+        return self.framework.makeOptimizer(self.parameters())
+
+    def save_pretrained(self, outputDir):
+        self.model.save_pretrained(outputDir)
+
+class Framework(object):
+    def __init__(self, args):
+        self.args = args
+
+    def makeStrategy(self):
+        pass
+
+    def makeOptimizer(self, parameters):
+        pass
+
+class FrameworkDeepSpeed(Framework):
+    def makeStrategy(self):
+        strategy = DeepSpeedStrategy(config=args.dataArgs.deepspeed_config)
+        args.trainArgs.train_micro_batch_size_per_gpu = strategy.config["train_micro_batch_size_per_gpu"]
+        return strategy
+
+    def makeOptimizer(self, parameters):
+        return DeepSpeedCPUAdam(parameters)
+
+class FramewordDDP(Framework):
+    def makeStrategy(self):
+        strategy = DDPStrategy()
+        return strategy
+
+    def makeOptimizer(self, parameters):
         optimizer = Adam(
-            self.parameters(), 
+            parameters, 
             lr=self.args.trainArgs.warmup_max_lr)
 
         def lr_foo(epoch):
@@ -45,7 +77,6 @@ class LlmModule(LightningModule):
                 lr_scale = 0.1 ** (self.args.trainArgs.warmup_num_steps - epoch)
             else:
                 lr_scale = 0.95 ** epoch
-
             return lr_scale
 
         scheduler = LambdaLR(
@@ -54,22 +85,10 @@ class LlmModule(LightningModule):
         )
         return ([optimizer], [scheduler])
 
-    def save_pretrained(self, outputDir):
-        self.model.save_pretrained(outputDir)
-
-def makeDDPStrategy(args):
-    strategy = DDPStrategy()
-    return strategy
-
-def makeDeepSpeedStrategy(args) :
-    strategy = DeepSpeedStrategy(config=args.dataArgs.deepspeed_config)
-    args.trainArgs.train_micro_batch_size_per_gpu = strategy.config["train_micro_batch_size_per_gpu"]
-    return strategy
-
-def trainerMain(args, strategy):
+def trainerMain(framework, args):
     dataModule = DataModule(args)
     model = loadPretrain(args.modelArgs)
-    llmModule = LlmModule(model, args)
+    llmModule = LlmModule(model, framework, args)
     
     lrLogger = LearningRateMonitor(logging_interval="step")
     profiler = SimpleProfiler()
@@ -77,7 +96,7 @@ def trainerMain(args, strategy):
         max_epochs=args.trainArgs.num_train_epochs,
         accelerator="auto",
         accumulate_grad_batches=args.trainArgs.accumulate_grad_batches,
-        strategy=strategy,
+        strategy=framework.makeStrategy(args),
         val_check_interval=0.5,
         gradient_clip_val=0.5,
         callbacks=[lrLogger],
@@ -88,5 +107,5 @@ def trainerMain(args, strategy):
 
 if __name__ == "__main__":
     args = ArgsLit()
-    strategy = makeDDPStrategy(args)
-    trainerMain(args, strategy)
+    framework = FrameworkDeepSpeed(args)
+    trainerMain(framework, args)
