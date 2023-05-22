@@ -1,7 +1,7 @@
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.strategies import DeepSpeedStrategy, DDPStrategy
-from pytorch_lightning.callbacks import LearningRateLogger
+from pytorch_lightning.callbacks import LearningRateMonitor
 from pytorch_lightning.profiler import SimpleProfiler
 from torch.optim import Adam
 from deepspeed.ops.adam import DeepSpeedCPUAdam
@@ -65,7 +65,7 @@ def trainerMain(strategy):
     model = loadPretrain(args.modelArgs)
     llmModule = LlmModule(model, args.args)
     
-    lrLogger = LearningRateLogger(logging_interval="step")
+    lrLogger = LearningRateMonitor(logging_interval="step")
     profiler = SimpleProfiler()
     trainer = Trainer(
         max_epochs=args.trainArgs.num_train_epochs,
