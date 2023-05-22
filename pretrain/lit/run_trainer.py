@@ -47,14 +47,14 @@ class Framework(object):
     def __init__(self, args):
         self.args = args
 
-    def makeStrategy(self):
+    def makeStrategy(self, args):
         pass
 
     def makeOptimizer(self, parameters):
         pass
 
 class FrameworkDeepSpeed(Framework):
-    def makeStrategy(self):
+    def makeStrategy(self, args):
         strategy = DeepSpeedStrategy(config=args.dataArgs.deepspeed_config)
         args.trainArgs.train_micro_batch_size_per_gpu = strategy.config["train_micro_batch_size_per_gpu"]
         return strategy
@@ -63,7 +63,7 @@ class FrameworkDeepSpeed(Framework):
         return DeepSpeedCPUAdam(parameters)
 
 class FramewordDDP(Framework):
-    def makeStrategy(self):
+    def makeStrategy(self, args):
         strategy = DDPStrategy()
         return strategy
 
