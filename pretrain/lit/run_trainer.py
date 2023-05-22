@@ -2,10 +2,9 @@ import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.strategies import DeepSpeedStrategy, DDPStrategy
 from pytorch_lightning.callbacks import LearningRateMonitor
-from pytorch_lightning.profiler import SimpleProfiler
+from lightning.pytorch.profilers.simple import SimpleProfiler
 from torch.optim import Adam
-from deepspeed.ops.adam import DeepSpeedCPUAdam
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+from torch.optim.lr_scheduler import LambdaLR
 
 torch.cuda.device_count()
 
@@ -40,10 +39,19 @@ class LlmModule(LightningModule):
         optimizer = Adam(
             self.parameters(), 
             lr=self.args.trainArgs.warmup_max_lr)
-        scheduler = LinearWarmupCosineAnnealingLR(
-            optimizer = optimizer,
-            eta_min = self.args.trainArgs.warmup_min_lr,
-            warmup_epochs = self.args.trainArgs.warmup_num_steps)
+
+        def lr_foo(epoch):
+            if epoch < self.args.trainArgs.warmup_num_steps:
+                lr_scale = 0.1 ** (self.args.trainArgs.warmup_num_steps - epoch)
+            else:
+                lr_scale = 0.95 ** epoch
+
+            return lr_scale
+
+        scheduler = LambdaLR(
+            optimizer,
+            lr_lambda=lr_foo
+        )
         return optimizer, scheduler
 
     def save_pretrained(self, outputDir):

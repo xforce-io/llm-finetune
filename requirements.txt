@@ -4,4 +4,4 @@ evaluate
 pytorch_lightning
 omegaconf
 lightning
-pl-bolts
+pytorch-lightning-bolts

@@ -26,15 +26,6 @@ class TrainingArgumentsLit(TrainingArguments):
         },
     )
 
-    warmup_min_lr: Optional[float] = field(
-        default=None,
-        metadata={
-            "help": (
-                "warmup min lr."
-            )
-        },
-    )
-
     warmup_max_lr: Optional[float] = field(
         default=None,
         metadata={
