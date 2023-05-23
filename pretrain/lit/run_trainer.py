@@ -6,6 +6,8 @@ from pytorch_lightning.callbacks import LearningRateMonitor
 from lightning.pytorch.profilers.simple import SimpleProfiler
 from torch.optim import Adam
 from torch.optim.lr_scheduler import LambdaLR
+from transformers.optimization import get_scheduler
+from transformers.trainer_utils import SchedulerType
 
 torch.cuda.device_count()
 
@@ -57,12 +59,21 @@ class FrameworkDeepSpeed(Framework):
     def makeStrategy(self, args):
         strategy = DeepSpeedStrategy(config=args.dataArgs.deepspeed_config)
         args.trainArgs.train_micro_batch_size_per_gpu = strategy.config["train_micro_batch_size_per_gpu"]
+
         return strategy
 
     def makeOptimizer(self, parameters):
-        return DeepSpeedCPUAdam(parameters)
+        optimizer = DeepSpeedCPUAdam(
+            parameters,
+            lr=self.args.trainArgs.warmup_max_lr)
+        scheduler = get_scheduler(
+            name=SchedulerType.COSINE, 
+            optimizer=optimizer, 
+            num_warmup_steps=self.args.trainArgs.warmup_num_steps)
+        scheduler = {"scheduler": scheduler, "interval": "step", "frequency": 1}
+        return ([optimizer], [scheduler])
 
-class FramewordDDP(Framework):
+class FrameworkDDP(Framework):
     def makeStrategy(self, args):
         strategy = DDPStrategy()
         return strategy
@@ -107,5 +118,5 @@ def trainerMain(framework, args):
 
 if __name__ == "__main__":
     args = ArgsLit()
-    framework = FrameworkDeepSpeed(args)
+    framework = FrameworkDDP(args)
     trainerMain(framework, args)
