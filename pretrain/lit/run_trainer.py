@@ -102,9 +102,7 @@ def trainerMain(framework, args):
         gradient_clip_val=0.5,
         callbacks=[lrLogger],
         profiler=profiler,
-        logger=CSVLogger("logs", name="current"))
-
-    log.info(f"optimizer_used{trainer.optimizers[0]}")
+        logger=CSVLogger("lightning_logs/", name="current"))
 
     trainer.fit(llmModule, datamodule=dataModule)
     trainer.validate(model=llmModule, datamodule=dataModule)
