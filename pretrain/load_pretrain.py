@@ -9,7 +9,7 @@ from transformers import (
 
 from pretrain.args import ModelArguments
 
-from pretrain.logger import logger 
+from pretrain.logger import log
 
 def loadTokenizer(modelArgs):
     tokenizer_kwargs = {
@@ -41,11 +41,11 @@ def loadPretrain(modelArgs :ModelArguments) :
         config = AutoConfig.from_pretrained(modelArgs.model_name_or_path, **config_kwargs)
     else:
         config = CONFIG_MAPPING[modelArgs.model_type]()
-        logger.warning("You are instantiating a new config instance from scratch.")
+        log.warning("You are instantiating a new config instance from scratch.")
         if modelArgs.config_overrides is not None:
-            logger.info(f"Overriding config: {modelArgs.config_overrides}")
+            log.info(f"Overriding config: {modelArgs.config_overrides}")
             config.update_from_string(modelArgs.config_overrides)
-            logger.info(f"New config: {config}")
+            log.info(f"New config: {config}")
 
     if modelArgs.model_name_or_path:
         torch_dtype = (
@@ -73,5 +73,5 @@ def loadPretrain(modelArgs :ModelArguments) :
     else:
         model = AutoModelForCausalLM.from_config(config)
         n_params = sum({p.data_ptr(): p.numel() for p in model.parameters()}.values())
-        logger.info(f"Training new model from scratch - Total size={n_params/2**20:.2f}M params")
+        log.info(f"Training new model from scratch - Total size={n_params/2**20:.2f}M params")
     return model
