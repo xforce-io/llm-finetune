@@ -1,13 +1,12 @@
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.strategies import DeepSpeedStrategy, DDPStrategy
-from deepspeed.ops.adam import DeepSpeedCPUAdam
 from pytorch_lightning.callbacks import LearningRateMonitor
 from lightning.pytorch.profilers.simple import SimpleProfiler
 from torch.optim import Adam
 from torch.optim.lr_scheduler import LambdaLR
-from transformers.optimization import get_cosine_schedule_with_warmup
-from transformers.trainer_utils import SchedulerType
+from lightning.pytorch.loggers import CSVLogger
+from logger import log
 
 torch.cuda.device_count()
 
@@ -29,6 +28,9 @@ class LlmModule(LightningModule):
         return self.model(**inputs)
 
     def training_step(self, batch, batch_idx):
+        lr = self.trainer.optimizers[0].param_groups[0]['lr']
+        self.log("lr", lr, prog_bar=True, on_step=True)
+
         outputs = self(**batch)
         loss = outputs[0]
         self.log("train_loss", loss)
@@ -37,7 +39,7 @@ class LlmModule(LightningModule):
     def validation_step(self, batch, batch_idx):
         outputs = self(**batch)
         loss = outputs[0]
-        self.log("validation_loss", loss)
+        self.log("val_loss", loss, prog_bar=True)
 
     def configure_optimizers(self):
         return self.framework.makeOptimizer(self.parameters())
@@ -50,26 +52,16 @@ class Framework(object):
         self.args = args
 
     def makeStrategy(self, args):
-        pass
+        return None
 
     def makeOptimizer(self, parameters):
-        pass
+        return None
 
 class FrameworkDeepSpeed(Framework):
     def makeStrategy(self, args):
         strategy = DeepSpeedStrategy(config=args.dataArgs.deepspeed_config)
         args.trainArgs.train_micro_batch_size_per_gpu = strategy.config["train_micro_batch_size_per_gpu"]
         return strategy
-
-    def makeOptimizer(self, parameters):
-        optimizer = DeepSpeedCPUAdam(
-            parameters,
-            lr=self.args.trainArgs.warmup_max_lr)
-        scheduler = get_cosine_schedule_with_warmup(
-            optimizer=optimizer, 
-            num_warmup_steps=self.args.trainArgs.warmup_num_steps)
-        scheduler = {"scheduler": scheduler, "interval": "step", "frequency": 1}
-        return ([optimizer], [scheduler])
 
 class FrameworkDDP(Framework):
     def makeStrategy(self, args):
@@ -109,12 +101,16 @@ def trainerMain(framework, args):
         val_check_interval=0.5,
         gradient_clip_val=0.5,
         callbacks=[lrLogger],
-        profiler=profiler)
+        profiler=profiler,
+        logger=CSVLogger("logs", name="current"))
+
+    log.info(f"optimizer_used{trainer.optimizers[0]}")
+
     trainer.fit(llmModule, datamodule=dataModule)
     trainer.validate(model=llmModule, datamodule=dataModule)
     llmModule.save_pretrained(args.trainArgs.output_dir)
 
 if __name__ == "__main__":
     args = ArgsLit()
-    framework = FrameworkDDP(args)
+    framework = FrameworkDeepSpeed(args)
     trainerMain(framework, args)
