@@ -3,7 +3,7 @@ import transformers
 from transformers.testing_utils import CaptureLogger
 from datasets import load_dataset
 from itertools import chain
-from pretrain.logger import logger
+from pretrain.logger import log
 
 class Dataset:
     def __init__(self) -> None:
@@ -141,7 +141,7 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
     if args.dataArgs.block_size is None:
         block_size = tokenizer.model_max_length
         if block_size > 1024:
-            logger.warning(
+            log.warning(
                 "The chosen tokenizer supports a `model_max_length` that is longer than the default `block_size` value"
                 " of 1024. If you would like to use a longer `block_size` up to `tokenizer.model_max_length` you can"
                 " override this default with `--block_size xxx`."
@@ -149,7 +149,7 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
             block_size = 1024
     else:
         if args.dataArgs.block_size > tokenizer.model_max_length:
-            logger.warning(
+            log.warning(
                 f"The block_size passed ({args.dataArgs.block_size}) is larger than the maximum length for the model"
                 f"({tokenizer.model_max_length}). Using block_size={tokenizer.model_max_length}."
             )
@@ -204,16 +204,16 @@ class DataModule(LightningDataModule):
     def __init__(self, args):
         super().__init__()
 
-        logger.info("start_load_dataset")
+        log.info("start_load_dataset")
         raw_datasets = loadDataset(args.dataArgs, args.modelArgs)
 
-        logger.info("start_load_tokenizer")
+        log.info("start_load_tokenizer")
         tokenizer = loadTokenizer(args.modelArgs)
 
-        logger.info("start_tokenizer_dataset")
+        log.info("start_tokenizer_dataset")
         tokenized_datasets = tokenizeDataset(args.trainArgs, args.dataArgs, tokenizer, raw_datasets)
 
-        logger.info("start_make_dataset")
+        log.info("start_make_dataset")
         self.dataset = makeDataset(tokenizer, args, tokenized_datasets)
         self.trainDataloader = DataLoader(
             self.dataset.train_dataset, 

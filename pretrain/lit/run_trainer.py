@@ -6,7 +6,6 @@ from lightning.pytorch.profilers.simple import SimpleProfiler
 from torch.optim import Adam
 from torch.optim.lr_scheduler import LambdaLR
 from lightning.pytorch.loggers import CSVLogger
-from logger import log
 
 torch.cuda.device_count()
 
@@ -16,6 +15,7 @@ sys.path.append("./")
 from pretrain.data import DataModule
 from pretrain.lit.args_lit import ArgsLit
 from pretrain.load_pretrain import loadPretrain
+from pretrain.logger import log, initLogging
 
 class LlmModule(LightningModule):
     def __init__(self, model, framework, args):
@@ -112,5 +112,7 @@ def trainerMain(framework, args):
 
 if __name__ == "__main__":
     args = ArgsLit()
+    initLogging(args.trainArgs)
+
     framework = FrameworkDeepSpeed(args)
     trainerMain(framework, args)
