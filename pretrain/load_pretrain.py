@@ -17,6 +17,7 @@ def loadTokenizer(modelArgs):
         "use_fast": modelArgs.use_fast_tokenizer,
         "revision": modelArgs.model_revision,
         "use_auth_token": True if modelArgs.use_auth_token else None,
+        "trust_remote_code": True
     }
     if modelArgs.tokenizer_name:
         tokenizer = AutoTokenizer.from_pretrained(modelArgs.tokenizer_name, **tokenizer_kwargs)
@@ -34,6 +35,7 @@ def loadPretrain(modelArgs :ModelArguments) :
         "cache_dir": modelArgs.cache_dir,
         "revision": modelArgs.model_revision,
         "use_auth_token": True if modelArgs.use_auth_token else None,
+        "trust_remote_code": True
     }
     if modelArgs.config_name:
         config = AutoConfig.from_pretrained(modelArgs.config_name, **config_kwargs)
