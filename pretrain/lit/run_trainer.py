@@ -29,7 +29,7 @@ class LlmModule(LightningModule):
 
     def training_step(self, batch, batch_idx):
         lr = self.trainer.optimizers[0].param_groups[0]['lr']
-        self.log("lr", lr, prog_bar=True, on_step=True)
+        self.log("lr", lr, prog_bar=True)
 
         outputs = self(**batch)
         loss = outputs[0]
@@ -98,7 +98,7 @@ def trainerMain(framework, args):
         accelerator="auto",
         accumulate_grad_batches=args.trainArgs.accumulate_grad_batches,
         strategy=framework.makeStrategy(args),
-        val_check_interval=0.5,
+        val_check_interval=0.2,
         gradient_clip_val=0.5,
         callbacks=[lrLogger],
         profiler=profiler,

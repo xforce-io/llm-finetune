@@ -140,7 +140,7 @@ class DataArguments:
         },
     )
     overwrite_cache: bool = field(
-        default=True, metadata={"help": "Overwrite the cached training and evaluation sets"}
+        default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
     )
     validation_split_percentage: Optional[int] = field(
         default=5,
