@@ -173,7 +173,7 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
         if "train" not in tokenized_datasets:
             raise ValueError("--do_train requires a train dataset")
         dataset.set_train_dataset(lm_datasets["train"], args.dataArgs)
-        log.info("token_size_to_be_trained[%d]" % len(lm_datasets["train"]) * block_size)
+        log.info("token_size_to_be_trained[%d]" % (len(lm_datasets["train"]) * block_size))
 
     if args.trainArgs.do_eval:
         if "validation" not in tokenized_datasets:
