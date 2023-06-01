@@ -44,6 +44,17 @@ class TrainingArgumentsLit(TrainingArguments):
         },
     )
 
+    default_root_dir: Optional[str] = field(
+        default="./", 
+        metadata={
+            "help": "The input training data file (a text file)."
+        }
+    )
+
+    logger_tensorboard: bool = field(
+        default=True, metadata={"help": "Board type"}
+    )
+
     def __init__(self, **kwargs):
         names = set([f.name for f in dataclasses.fields(self)])
         for k, v in kwargs.items():

@@ -6,6 +6,7 @@ from lightning.pytorch.profilers.simple import SimpleProfiler
 from torch.optim import Adam
 from torch.optim.lr_scheduler import LambdaLR
 from lightning.pytorch.loggers import CSVLogger
+from lightning.pytorch.loggers import TensorBoardLogger
 
 torch.cuda.device_count()
 
@@ -107,7 +108,13 @@ def trainerMain(framework, args):
         gradient_clip_val=0.5,
         callbacks=[lrLogger],
         profiler=profiler,
-        logger=CSVLogger("lightning_logs/", name="current"))
+        default_root_dir=args.trainArgs.default_root_dir,
+        logger=TensorBoardLogger(
+            save_dir=args.trainArgs.default_root_dir, 
+            version=1, 
+            name="lightning_logs") 
+                if args.trainArgs.logger_tensorboard 
+                else CSVLogger(f"{args.trainArgs.logger_tensorboard}/lightning_logs/", name="current"))
 
     trainer.fit(llmModule, datamodule=dataModule)
     trainer.validate(model=llmModule, datamodule=dataModule)

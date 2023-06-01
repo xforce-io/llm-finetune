@@ -17,6 +17,7 @@ CUDA_LAUNCH_BLOCKING=1 lightning run model pretrain/lit/run_trainer.py \
         warmup_max_lr=3e-4 \
         warmup_num_steps=1000 \
         num_train_epochs=2 \
+        default_root_dir="" \ 
         output_dir="output/checkpoint" \
         do_train=true \
         do_eval=true
