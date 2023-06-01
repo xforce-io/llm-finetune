@@ -55,10 +55,6 @@ class TrainingArgumentsLit(TrainingArguments):
         default=True, metadata={"help": "Board type"}
     )
 
-    output_dir: Optional[str] = field(
-        default="./", metadata={"help": "Output dir"}
-    )
-
     def __init__(self, **kwargs):
         names = set([f.name for f in dataclasses.fields(self)])
         for k, v in kwargs.items():
