@@ -31,7 +31,7 @@ class LlmModule(LightningModule):
         self.args = args
         
     def forward(self, **inputs):
-        return self.model(**inputs)
+        return self.model(**inputs, use_cache=False)
 
     def training_step(self, batch, batch_idx):
         lr = self.trainer.optimizers[0].param_groups[0]['lr']
