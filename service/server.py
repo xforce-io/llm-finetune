@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from transformers import GenerationConfig, AutoModelForCausalLM, AutoTokenizer
+from transformers import GenerationConfig, AutoModelForCausalLM, AutoTokenizer, AutoConfig
 from prompter import Prompter
 import torch
 import fire
@@ -17,19 +17,22 @@ model = None
 tokenizer = None
 
 def initModel(
+        configNameOrPath,
         tokenizerNameOrPath,
         modelNameOrPath, 
         loraWeights):
+    config = AutoConfig.from_pretrained(configNameOrPath)
+    tokenizer = AutoTokenizer.from_pretrained(tokenizerNameOrPath) 
     if not loraWeights:
-        tokenizer = AutoTokenizer.from_pretrained(tokenizerNameOrPath) 
         model = AutoModelForCausalLM.from_pretrained(
             modelNameOrPath,
+            config=config,
             torch_dtype=torch.float16,
             device_map="auto")
     else:
-        tokenizer = AutoTokenizer.from_pretrained(tokenizerNameOrPath) 
         model = AutoModelForCausalLM.from_pretrained(
             modelNameOrPath,
+            config=config,
             torch_dtype=torch.float16,
             device_map="auto")
 
@@ -116,14 +119,17 @@ def getResponse(instruction, input, **kwargs):
         return output
 
 def runApp(
+        config_name_or_path,
         tokenizer_name_or_path,
         model_name_or_path, 
         lora_weights=None):
+    assert(config_name_or_path)
     assert(tokenizer_name_or_path)
     assert(model_name_or_path)
 
     global model, tokenizer
     model, tokenizer = initModel(
+        config_name_or_path,
         tokenizer_name_or_path,
         model_name_or_path, 
         lora_weights)

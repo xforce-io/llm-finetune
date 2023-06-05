@@ -42,6 +42,8 @@ def loadDataset(dataArgs, modelArgs) :
         if dataArgs.train_file is not None
         else dataArgs.validation_file.split(".")[-1]
     )
+
+    encoding="ISO-8859-1"
     if extension == "txt":
         extension = "text"
         dataset_args["keep_linebreaks"] = dataArgs.keep_linebreaks
@@ -50,6 +52,7 @@ def loadDataset(dataArgs, modelArgs) :
         data_files=data_files,
         cache_dir=modelArgs.cache_dir,
         use_auth_token=True if modelArgs.use_auth_token else None,
+        encoding=encoding,
         **dataset_args,
     )
     # If no validation data is there, validation_split_percentage will be used to divide the dataset.
@@ -60,6 +63,7 @@ def loadDataset(dataArgs, modelArgs) :
             split=f"train[:{dataArgs.validation_split_percentage}%]",
             cache_dir=modelArgs.cache_dir,
             use_auth_token=True if modelArgs.use_auth_token else None,
+            encoding=encoding,
             **dataset_args,
         )
         raw_datasets["train"] = load_dataset(
@@ -68,6 +72,7 @@ def loadDataset(dataArgs, modelArgs) :
             split=f"train[{dataArgs.validation_split_percentage}%:]",
             cache_dir=modelArgs.cache_dir,
             use_auth_token=True if modelArgs.use_auth_token else None,
+            encoding=encoding,
             **dataset_args,
         )
     return raw_datasets
