@@ -102,7 +102,10 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
                 "^^^^^^^^^^^^^^^^ Please ignore the warning above - this long input will be chunked into smaller bits"
                 " before being passed to the model."
             )
-        return text, label
+        return {
+            text_column_name :text, 
+            label_column_name : label
+        }
 
     with trainArgs.main_process_first(desc="dataset map tokenization"):
         if not dataArgs.streaming:
