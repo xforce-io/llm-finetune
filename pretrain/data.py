@@ -43,7 +43,8 @@ def loadDataset(dataArgs, modelArgs) :
         else dataArgs.validation_file.split(".")[-1]
     )
 
-    encoding="ISO-8859-1"
+    #encoding="ISO-8859-1"
+    encoding = "utf-8"
     if extension == "txt":
         extension = "text"
         dataset_args["keep_linebreaks"] = dataArgs.keep_linebreaks

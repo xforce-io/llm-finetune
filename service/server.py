@@ -9,7 +9,7 @@ kTopP = 0.75
 kTopK = 40
 kNumBeams = 4
 kPromptTemplate = ""
-kMaxTokens = 16
+kMaxTokens = 1000
 kStop = "\n"
 
 app = Flask(__name__)
