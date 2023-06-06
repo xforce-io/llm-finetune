@@ -89,18 +89,16 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
 
     def tokenize_function(examples):
         with CaptureLogger(tok_logger) as cl:
-            text = tokenizer(examples[text_column_name])
+            tok_text = tokenizer(examples[text_column_name])
             label = tokenizer(examples[label_column_name])
+            tok_text[label_column_name] = label["input_ids"]
         # clm input could be much much longer than block_size
         if "Token indices sequence length is longer than the" in cl.out:
             tok_logger.warning(
                 "^^^^^^^^^^^^^^^^ Please ignore the warning above - this long input will be chunked into smaller bits"
                 " before being passed to the model."
             )
-        return {
-            text_column_name :text, 
-            label_column_name : label
-        }
+        return tok_text
 
     with trainArgs.main_process_first(desc="dataset map tokenization"):
         if not dataArgs.streaming:
