@@ -48,6 +48,9 @@ def loadDataset(dataArgs, modelArgs) :
     if extension == "txt":
         extension = "text"
         dataset_args["keep_linebreaks"] = dataArgs.keep_linebreaks
+    elif extension == "jsonl":
+        extension = "json"
+        
     raw_datasets = load_dataset(
         extension,
         data_files=data_files,
@@ -84,20 +87,22 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
     else:
         column_names = list(raw_datasets["validation"].features)
     text_column_name = "text" if "text" in column_names else column_names[0]
+    label_column_name = "labels"
 
     # since this will be pickled to avoid _LazyModule error in Hasher force logger loading before tokenize_function
     tok_logger = transformers.utils.logging.get_logger("transformers.tokenization_utils_base")
 
     def tokenize_function(examples):
         with CaptureLogger(tok_logger) as cl:
-            output = tokenizer(examples[text_column_name])
+            text = tokenizer(examples[text_column_name])
+            label = tokenizer(examples[label_column_name])
         # clm input could be much much longer than block_size
         if "Token indices sequence length is longer than the" in cl.out:
             tok_logger.warning(
                 "^^^^^^^^^^^^^^^^ Please ignore the warning above - this long input will be chunked into smaller bits"
                 " before being passed to the model."
             )
-        return output
+        return text, label
 
     with trainArgs.main_process_first(desc="dataset map tokenization"):
         if not dataArgs.streaming:
@@ -139,7 +144,9 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
             k: [t[i : i + block_size] for i in range(0, total_length-block_size, block_size)]
             for k, t in concatenated_examples.items()
         }
-        result["labels"] = result["input_ids"].copy()
+
+        if "labels" not in result:
+            result["labels"] = result["input_ids"].copy()
         return result
 
     if args.dataArgs.block_size is None:
