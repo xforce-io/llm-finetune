@@ -94,6 +94,9 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
                 text += examples[label_column_name]
             
             tok_text = tokenizer(text)
+            tok_text["input_ids"].append(tokenizer.eos_token_id)
+            tok_text["attention_mask"].append(1)
+
         # clm input could be much much longer than block_size
         if "Token indices sequence length is longer than the" in cl.out:
             tok_logger.warning(
