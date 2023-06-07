@@ -239,6 +239,8 @@ class DataModule(LightningDataModule):
             batch_size=args.trainArgs.train_micro_batch_size_per_gpu,
             num_workers=args.dataArgs.preprocessing_num_workers)
 
+        self.tokenizer = tokenizer
+
     def train_dataloader(self):
         return self.trainDataloader
 

@@ -11,6 +11,8 @@ from pretrain.args import ModelArguments
 
 from pretrain.logger import log
 
+DEFAULT_EOS_TOKEN = "</s>"
+
 def loadTokenizer(modelArgs):
     tokenizer_kwargs = {
         "cache_dir": modelArgs.cache_dir,
@@ -28,6 +30,10 @@ def loadTokenizer(modelArgs):
             "You are instantiating a new tokenizer from scratch. This is not supported by this script."
             "You can do it from another script, save it, and load it from here, using --tokenizer_name."
         )
+
+    special_tokens_dict = dict()
+    special_tokens_dict["eos_token"] = DEFAULT_EOS_TOKEN
+    tokenizer.add_special_tokens(special_tokens_dict)
     return tokenizer
 
 def loadPretrain(modelArgs :ModelArguments) :

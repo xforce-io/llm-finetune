@@ -95,6 +95,8 @@ class FrameworkDDP(Framework):
 def trainerMain(framework, args):
     dataModule = DataModule(args)
     model = loadPretrain(args.modelArgs)
+    model.resize_token_embeddings(len(dataModule.tokenizer))
+    
     llmModule = LlmModule(model, framework, args)
     
     lrLogger = LearningRateMonitor(logging_interval="step")
