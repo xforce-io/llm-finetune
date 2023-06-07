@@ -89,9 +89,11 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
 
     def tokenize_function(examples):
         with CaptureLogger(tok_logger) as cl:
-            tok_text = tokenizer(examples[text_column_name])
-            label = tokenizer(examples[label_column_name])
-            tok_text[label_column_name] = label["input_ids"]
+            text = examples[text_column_name]
+            if label_column_name in examples:
+                text += examples[label_column_name]
+            
+            tok_text = tokenizer(text)
         # clm input could be much much longer than block_size
         if "Token indices sequence length is longer than the" in cl.out:
             tok_logger.warning(
@@ -141,8 +143,7 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
             for k, t in concatenated_examples.items()
         }
 
-        if "labels" not in result:
-            result["labels"] = result["input_ids"].copy()
+        result["labels"] = result["input_ids"].copy()
         return result
 
     if args.dataArgs.block_size is None:
