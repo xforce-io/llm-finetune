@@ -99,11 +99,16 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
             if label_column_name in examples:
                 tok_label = tokenizer(examples[label_column_name])
 
-            tok_text["source_len"] = []
+            tok_text["labels"] = []
             for i in range(size):
-                tok_text["source_len"] += [len(tok_text["input_ids"][i])]
-                tok_text["input_ids"][i] += tok_label["input_ids"][i]
-                tok_text["attention_mask"][i] += tok_label["attention_mask"][i]
+                if label_column_name in examples:
+                    tok_text["labels"].append([len(tok_text["input_ids"][i]) * ID_IGNORED])
+                    tok_text["labels"][i].append([tok_label["input_ids"][i]])
+                    tok_text["labels"][i].append(tokenizer.eos_token_id)
+
+                    tok_text["input_ids"][i] += tok_label["input_ids"][i]
+                    tok_text["attention_mask"][i] += tok_label["attention_mask"][i]
+                
                 tok_text["input_ids"][i].append(tokenizer.eos_token_id)
                 tok_text["attention_mask"][i].append(1)
 
@@ -155,12 +160,6 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
             k: [t[i : i + block_size] for i in range(0, total_length-block_size, block_size)]
             for k, t in concatenated_examples.items()
         }
-
-        result["labels"] = result["input_ids"].copy()
-        size = len(result["labels"])
-        for i in range(size):
-            sourceLen = result["source_len"]
-            result["labels"][i][:sourceLen] = ID_IGNORED
         return result
 
     if args.dataArgs.block_size is None:
