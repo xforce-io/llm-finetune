@@ -5,6 +5,8 @@ from datasets import load_dataset
 from itertools import chain
 from pretrain.logger import log
 
+ID_IGNORED = -100
+
 class Dataset:
     def __init__(self) -> None:
         pass
@@ -90,12 +92,18 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
     def tokenize_function(examples):
         with CaptureLogger(tok_logger) as cl:
             text = examples[text_column_name]
-            if label_column_name in examples:
-                text += examples[label_column_name]
+            size = len(text)
             
             tok_text = tokenizer(text)
-            tok_text["input_ids"].append(tokenizer.eos_token_id)
-            tok_text["attention_mask"].append(1)
+            tok_label = None
+            if label_column_name in examples:
+                tok_label = tokenizer(examples[label_column_name])
+
+            tok_text["source_len"] = []
+            for i in range(size):
+                tok_text["source_len"] += [len(tok_text["input_ids"])]
+                tok_text["input_ids"][i].append(tok_label["input_ids"][i]).append(tokenizer.eos_token_id)
+                tok_text["attention_mask"][i].append(tok_label["attention_mask"][i]).append(1)
 
         # clm input could be much much longer than block_size
         if "Token indices sequence length is longer than the" in cl.out:
@@ -147,6 +155,10 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
         }
 
         result["labels"] = result["input_ids"].copy()
+        size = len(result["labels"])
+        for i in range(size):
+            sourceLen = result["source_len"]
+            result["labels"][i][:sourceLen] = ID_IGNORED
         return result
 
     if args.dataArgs.block_size is None:
