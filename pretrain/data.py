@@ -101,9 +101,11 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
 
             tok_text["source_len"] = []
             for i in range(size):
-                tok_text["source_len"] += [len(tok_text["input_ids"])]
-                tok_text["input_ids"][i].append(tok_label["input_ids"][i]).append(tokenizer.eos_token_id)
-                tok_text["attention_mask"][i].append(tok_label["attention_mask"][i]).append(1)
+                tok_text["source_len"] += [len(tok_text["input_ids"][i])]
+                tok_text["input_ids"][i] += tok_label["input_ids"][i]
+                tok_text["attention_mask"][i] += tok_label["attention_mask"][i]
+                tok_text["input_ids"][i].append(tokenizer.eos_token_id)
+                tok_text["attention_mask"][i].append(1)
 
         # clm input could be much much longer than block_size
         if "Token indices sequence length is longer than the" in cl.out:
