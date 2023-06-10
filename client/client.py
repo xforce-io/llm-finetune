@@ -18,9 +18,9 @@ def post_request(url, prompt):
     if response.status_code == 200:
         result = response.json()
         # 对返回的 JSON 数据进行处理
-        print(result)
+        return result
     else:
-        print('fail request')
+        return None
 
 if __name__ == '__main__':
     fire.Fire(post_request)
