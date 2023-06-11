@@ -99,7 +99,9 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
             if label_column_name in examples:
                 tok_label = tokenizer(examples[label_column_name])
 
-            tok_text["labels"] = []
+            if label_column_name in examples:
+                tok_text["labels"] = []
+
             for i in range(size):
                 if label_column_name in examples:
                     tok_text["labels"].append(len(tok_text["input_ids"][i]) * [ID_IGNORED])
