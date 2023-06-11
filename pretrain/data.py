@@ -84,7 +84,6 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
     else:
         column_names = list(raw_datasets["validation"].features)
     text_column_name = "text" if "text" in column_names else column_names[0]
-    label_column_name = "labels"
 
     # since this will be pickled to avoid _LazyModule error in Hasher force logger loading before tokenize_function
     tok_logger = transformers.utils.logging.get_logger("transformers.tokenization_utils_base")
@@ -96,14 +95,14 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
             
             tok_text = tokenizer(text)
             tok_label = None
-            if label_column_name in examples:
-                tok_label = tokenizer(examples[label_column_name])
+            if "labels" in examples:
+                tok_label = tokenizer(examples["labels"])
 
-            if label_column_name in examples:
+            if "labels" in examples:
                 tok_text["labels"] = []
 
             for i in range(size):
-                if label_column_name in examples:
+                if "labels" in examples:
                     tok_text["labels"].append(len(tok_text["input_ids"][i]) * [ID_IGNORED])
                     #tok_text["labels"].append(tok_text["input_ids"][i].copy())
                     tok_text["labels"][i] += tok_label["input_ids"][i]
@@ -163,6 +162,9 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
             k: [t[i : i + block_size] for i in range(0, total_length-block_size, block_size)]
             for k, t in concatenated_examples.items()
         }
+
+        if "labels" not in result:
+            result["labels"] = result["input_ids"].copy()
         return result
 
     if args.dataArgs.block_size is None:
