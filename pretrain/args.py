@@ -79,6 +79,9 @@ class ModelArguments:
             )
         },
     )
+    load_in_8bit: bool = field(
+        default=False, metadata={"help": "Refer LLM.int8"}
+    )
 
     def __init__(self, **kwargs):
         names = set([f.name for f in dataclasses.fields(self)])
@@ -140,7 +143,7 @@ class DataArguments:
         },
     )
     overwrite_cache: bool = field(
-        default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
+        default=True, metadata={"help": "Overwrite the cached training and evaluation sets"}
     )
     validation_split_percentage: Optional[int] = field(
         default=5,

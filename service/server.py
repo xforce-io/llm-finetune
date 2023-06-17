@@ -119,6 +119,7 @@ def getResponse(instruction, input, **kwargs):
         return output
 
 def runApp(
+        port,
         config_name_or_path,
         tokenizer_name_or_path,
         model_name_or_path, 
@@ -134,7 +135,7 @@ def runApp(
         model_name_or_path, 
         lora_weights)
     
-    app.run(debug = True)
+    app.run(debug = True, port = port)
 
 if __name__ == "__main__":
     fire.Fire(runApp)

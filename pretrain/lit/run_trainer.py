@@ -110,6 +110,7 @@ def trainerMain(framework, args):
         gradient_clip_val=0.5,
         callbacks=[lrLogger],
         profiler=profiler,
+        enable_checkpointing=False,
         default_root_dir=args.trainArgs.default_root_dir,
         logger=TensorBoardLogger(
             save_dir=args.trainArgs.default_root_dir, 
@@ -123,6 +124,8 @@ def trainerMain(framework, args):
     llmModule.save_pretrained(args.trainArgs.output_dir)
 
 if __name__ == "__main__":
+    torch.set_float32_matmul_precision("high")
+
     args = ArgsLit()
     initLogging(args.trainArgs)
 

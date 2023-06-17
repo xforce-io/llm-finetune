@@ -10,3 +10,7 @@ fire
 sentencepiece
 protobuf==3.20
 accelerate
+einops
+flash_attn
+tensorboard
+bitsandbytes

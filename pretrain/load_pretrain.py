@@ -76,7 +76,9 @@ def loadPretrain(modelArgs :ModelArguments) :
             use_auth_token=True if modelArgs.use_auth_token else None,
             torch_dtype=torch_dtype,
             low_cpu_mem_usage=modelArgs.low_cpu_mem_usage,
-            max_memory= max_mem
+            max_memory= max_mem,
+            load_in_8bit=modelArgs.load_in_8bit,
+            device_map="auto",
         )
     else:
         model = AutoModelForCausalLM.from_config(config)
