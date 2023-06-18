@@ -62,24 +62,28 @@ def loadPretrain(modelArgs :ModelArguments) :
             else getattr(torch, modelArgs.torch_dtype)
         )
 
-        MAX_MEM_PER_GPU = "80GB"
-        max_mem = {}
-        for i in range(8):
-            max_mem[i] = MAX_MEM_PER_GPU
-        
-        model = AutoModelForCausalLM.from_pretrained(
-            modelArgs.model_name_or_path,
-            from_tf=bool(".ckpt" in modelArgs.model_name_or_path),
-            config=config,
-            cache_dir=modelArgs.cache_dir,
-            revision=modelArgs.model_revision,
-            use_auth_token=True if modelArgs.use_auth_token else None,
-            torch_dtype=torch_dtype,
-            low_cpu_mem_usage=modelArgs.low_cpu_mem_usage,
-            max_memory= max_mem,
-            load_in_8bit=modelArgs.load_in_8bit,
-            device_map="auto",
-        )
+        if modelArgs.load_in_8bit:
+            model = AutoModelForCausalLM.from_pretrained(
+                modelArgs.model_name_or_path,
+                from_tf=bool(".ckpt" in modelArgs.model_name_or_path),
+                config=config,
+                cache_dir=modelArgs.cache_dir,
+                revision=modelArgs.model_revision,
+                use_auth_token=True if modelArgs.use_auth_token else None,
+                torch_dtype=torch_dtype,
+                low_cpu_mem_usage=True,
+                load_in_8bit=True,
+                device_map="auto")
+        else:
+             model = AutoModelForCausalLM.from_pretrained(
+                modelArgs.model_name_or_path,
+                from_tf=bool(".ckpt" in modelArgs.model_name_or_path),
+                config=config,
+                cache_dir=modelArgs.cache_dir,
+                revision=modelArgs.model_revision,
+                use_auth_token=True if modelArgs.use_auth_token else None,
+                torch_dtype=torch_dtype,
+                low_cpu_mem_usage=modelArgs.low_cpu_mem_usage)
     else:
         model = AutoModelForCausalLM.from_config(config)
         n_params = sum({p.data_ptr(): p.numel() for p in model.parameters()}.values())
