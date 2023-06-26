@@ -125,6 +125,7 @@ def trainerMain(framework, args):
 
 if __name__ == "__main__":
     torch.set_float32_matmul_precision("high")
+    torch.distributed.init_process_group(backend="nccl")
 
     args = ArgsLit()
     initLogging(args.trainArgs)

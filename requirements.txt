@@ -1,5 +1,5 @@
 deepspeed
-transformers
+transformers==4.29.2
 evaluate
 pytorch_lightning
 omegaconf
@@ -11,6 +11,9 @@ sentencepiece
 protobuf==3.20
 accelerate
 einops
+packaging
 flash_attn
 tensorboard
 bitsandbytes
+pytest
+scipy

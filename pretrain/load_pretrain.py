@@ -22,9 +22,13 @@ def loadTokenizer(modelArgs):
         "trust_remote_code": True
     }
     if modelArgs.tokenizer_name:
-        tokenizer = AutoTokenizer.from_pretrained(modelArgs.tokenizer_name, **tokenizer_kwargs)
+        tokenizer = AutoTokenizer.from_pretrained(
+            modelArgs.tokenizer_name, 
+            **tokenizer_kwargs)
     elif modelArgs.model_name_or_path:
-        tokenizer = AutoTokenizer.from_pretrained(modelArgs.model_name_or_path, **tokenizer_kwargs)
+        tokenizer = AutoTokenizer.from_pretrained(
+            modelArgs.model_name_or_path, 
+            **tokenizer_kwargs)
     else:
         raise ValueError(
             "You are instantiating a new tokenizer from scratch. This is not supported by this script."
