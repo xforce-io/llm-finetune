@@ -7,6 +7,7 @@ from torch.optim import Adam
 from torch.optim.lr_scheduler import LambdaLR
 from lightning.pytorch.loggers import CSVLogger
 from lightning.pytorch.loggers import TensorBoardLogger
+import deepspeed.comm as dist
 
 torch.cuda.device_count()
 
@@ -122,6 +123,8 @@ def trainerMain(framework, args):
     trainer.fit(llmModule, datamodule=dataModule)
     trainer.validate(model=llmModule, datamodule=dataModule)
     llmModule.save_pretrained(args.trainArgs.output_dir)
+
+    dist.log_summary()
 
 if __name__ == "__main__":
     torch.set_float32_matmul_precision("high")
