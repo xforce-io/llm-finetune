@@ -1,5 +1,5 @@
 {
-    "train_micro_batch_size_per_gpu": 12,
+    "train_micro_batch_size_per_gpu": 4,
     "bf16": {
         "enabled": true
     },
@@ -16,7 +16,7 @@
             "warmup_min_lr": 1e-6,
             "warmup_max_lr": 1e-4,
             "warmup_num_steps": 200,
-            "total_num_steps" : 100000
+            "total_num_steps" : 200000
         }
     },
     "zero_optimization": {

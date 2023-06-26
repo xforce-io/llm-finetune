@@ -3,7 +3,7 @@ CUDA_VISIBLE_DEVICES=7 lightning run model pretrain/lit/run_trainer.py \
         --main_port 29500 \
         --devices 1 \
         port=5001 \
-        train_micro_batch_size_per_gpu=4 \
+        train_micro_batch_size_per_gpu=12 \
         accumulate_grad_batches=16 \
         deepspeed_config="conf/deepspeed_config_speed.json" \
         train_file="data/sample_train_10w.txt" \

@@ -6,8 +6,8 @@ CUDA_LAUNCH_BLOCKING=1 lightning run model pretrain/lit/run_trainer.py \
         --precision bf16-mixed \
         --devices 8 \
         port=5000 \
-        train_micro_batch_size_per_gpu=12 \
-        accumulate_grad_batches=2 \
+        train_micro_batch_size_per_gpu=4 \
+        accumulate_grad_batches=16 \
         deepspeed_config="conf/deepspeed_config.json" \
         train_file="data/sample_train.txt" \
         validation_file="data/sample_eval.txt" \
