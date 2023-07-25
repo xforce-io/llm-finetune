@@ -1,3 +1,4 @@
+import os
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.strategies import DeepSpeedStrategy, DDPStrategy
@@ -8,6 +9,7 @@ from torch.optim.lr_scheduler import LambdaLR
 from lightning.pytorch.loggers import CSVLogger
 from lightning.pytorch.loggers import TensorBoardLogger
 import deepspeed.comm as dist
+from datetime import timedelta
 
 torch.cuda.device_count()
 
@@ -113,6 +115,7 @@ def trainerMain(framework, args):
         profiler=profiler,
         enable_checkpointing=False,
         default_root_dir=args.trainArgs.default_root_dir,
+        inference_mode=False,
         logger=TensorBoardLogger(
             save_dir=args.trainArgs.default_root_dir, 
             version=1, 
@@ -128,10 +131,13 @@ def trainerMain(framework, args):
 
 if __name__ == "__main__":
     torch.set_float32_matmul_precision("high")
-    torch.distributed.init_process_group(backend="nccl")
+    torch.distributed.init_process_group(
+        rank=int(os.environ["SLURM_PROCID"]),
+        world_size=int(os.environ["SLURM_NTASKS"]),
+        backend="nccl")
 
     args = ArgsLit()
-    initLogging(args.trainArgs)
+    initLogging(args)
 
     framework = FrameworkDeepSpeed(args)
     trainerMain(framework, args)
