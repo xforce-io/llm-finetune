@@ -104,7 +104,6 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
             for i in range(size):
                 if "labels" in examples:
                     tok_text["labels"].append(len(tok_text["input_ids"][i]) * [ID_IGNORED])
-                    #tok_text["labels"].append(tok_text["input_ids"][i].copy())
                     tok_text["labels"][i] += tok_label["input_ids"][i]
                     tok_text["labels"][i].append(tokenizer.eos_token_id)
 

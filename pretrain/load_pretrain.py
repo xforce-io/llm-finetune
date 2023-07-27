@@ -38,6 +38,7 @@ def loadTokenizer(modelArgs):
     special_tokens_dict = dict()
     special_tokens_dict["eos_token"] = DEFAULT_EOS_TOKEN
     tokenizer.add_special_tokens(special_tokens_dict)
+    log.info(f"model_max_length for tokenization is {tokenizer.model_max_length}")
     return tokenizer
 
 def loadPretrain(modelArgs :ModelArguments) :

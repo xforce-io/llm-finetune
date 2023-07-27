@@ -42,7 +42,7 @@ class LlmModule(LightningModule):
 
         outputs = self(**batch)
         loss = outputs[0]
-        self.log("train_loss", loss)
+        self.log("train_loss", loss, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -109,7 +109,7 @@ def trainerMain(framework, args):
         accelerator="auto",
         accumulate_grad_batches=args.trainArgs.accumulate_grad_batches,
         strategy=framework.makeStrategy(args),
-        val_check_interval=0.2,
+        val_check_interval=0.1,
         gradient_clip_val=0.5,
         callbacks=[lrLogger],
         profiler=profiler,
