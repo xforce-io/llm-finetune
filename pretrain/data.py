@@ -83,26 +83,41 @@ def tokenizeDataset(trainArgs, dataArgs, tokenizer, raw_datasets):
         column_names = list(raw_datasets["train"].features)
     else:
         column_names = list(raw_datasets["validation"].features)
-    text_column_name = "text" if "text" in column_names else column_names[0]
+
+    if "text" in column_names:
+        text_column_name = "text"
+        label_column_name = "labels"
+    elif "instruction" in column_names:
+        text_column_name = "instruction"
+        label_column_name = "output"
+    else:
+        assert False
 
     # since this will be pickled to avoid _LazyModule error in Hasher force logger loading before tokenize_function
     tok_logger = transformers.utils.logging.get_logger("transformers.tokenization_utils_base")
 
+    def getColumn(column_names, examples, column):
+        result = examples[column]
+        if column == "instruction":
+            if "input" in column_names:
+                result += examples["input"]
+        return result
+
     def tokenize_function(examples):
         with CaptureLogger(tok_logger) as cl:
-            text = examples[text_column_name]
+            text = getColumn(column_names, examples, text_column_name)
             size = len(text)
             
             tok_text = tokenizer(text)
             tok_label = None
-            if "labels" in examples:
-                tok_label = tokenizer(examples["labels"])
+            if label_column_name in examples:
+                tok_label = tokenizer(getColumn(column_names, examples, label_column_name))
 
-            if "labels" in examples:
+            if label_column_name in examples:
                 tok_text["labels"] = []
 
             for i in range(size):
-                if "labels" in examples:
+                if label_column_name in examples:
                     tok_text["labels"].append(len(tok_text["input_ids"][i]) * [ID_IGNORED])
                     tok_text["labels"][i] += tok_label["input_ids"][i]
                     tok_text["labels"][i].append(tokenizer.eos_token_id)
