@@ -55,7 +55,7 @@ def loadDataset(dataArgs, modelArgs) :
         extension,
         data_files=data_files,
         cache_dir=modelArgs.cache_dir,
-        use_auth_token=True if modelArgs.use_auth_token else None,
+        token=True if modelArgs.use_auth_token else None,
         **dataset_args,
     )
     # If no validation data is there, validation_split_percentage will be used to divide the dataset.
@@ -65,7 +65,7 @@ def loadDataset(dataArgs, modelArgs) :
             data_files=data_files,
             split=f"train[:{dataArgs.validation_split_percentage}%]",
             cache_dir=modelArgs.cache_dir,
-            use_auth_token=True if modelArgs.use_auth_token else None,
+            token=True if modelArgs.use_auth_token else None,
             **dataset_args,
         )
         raw_datasets["train"] = load_dataset(
@@ -73,7 +73,7 @@ def loadDataset(dataArgs, modelArgs) :
             data_files=data_files,
             split=f"train[{dataArgs.validation_split_percentage}%:]",
             cache_dir=modelArgs.cache_dir,
-            use_auth_token=True if modelArgs.use_auth_token else None,
+            token=True if modelArgs.use_auth_token else None,
             **dataset_args,
         )
     return raw_datasets
