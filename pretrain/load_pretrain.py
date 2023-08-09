@@ -78,7 +78,8 @@ def loadPretrain(modelArgs :ModelArguments) :
                 torch_dtype=torch_dtype,
                 low_cpu_mem_usage=True,
                 load_in_8bit=True,
-                device_map="auto")
+                device_map="auto",
+                trust_remote_code=True)
         else:
              model = AutoModelForCausalLM.from_pretrained(
                 modelArgs.model_name_or_path,
@@ -88,9 +89,12 @@ def loadPretrain(modelArgs :ModelArguments) :
                 revision=modelArgs.model_revision,
                 token=True if modelArgs.use_auth_token else None,
                 torch_dtype=torch_dtype,
-                low_cpu_mem_usage=modelArgs.low_cpu_mem_usage)
+                low_cpu_mem_usage=modelArgs.low_cpu_mem_usage,
+                trust_remote_code=True)
     else:
-        model = AutoModelForCausalLM.from_config(config)
+        model = AutoModelForCausalLM.from_config(
+            config,
+            trust_remote_code=True)
         n_params = sum({p.data_ptr(): p.numel() for p in model.parameters()}.values())
         log.info(f"Training new model from scratch - Total size={n_params/2**20:.2f}M params")
     return model
