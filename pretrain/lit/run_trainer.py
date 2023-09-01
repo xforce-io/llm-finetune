@@ -113,7 +113,7 @@ def trainerMain(framework, args):
         gradient_clip_val=0.5,
         callbacks=[lrLogger],
         profiler=profiler,
-        enable_checkpointing=False,
+        enable_checkpointing=True,
         default_root_dir=args.trainArgs.default_root_dir,
         inference_mode=False,
         logger=TensorBoardLogger(
