@@ -109,7 +109,7 @@ def trainerMain(framework, args):
         accelerator="auto",
         accumulate_grad_batches=args.trainArgs.accumulate_grad_batches,
         strategy=framework.makeStrategy(args),
-        val_check_interval=0.1,
+        val_check_interval=0.2,
         gradient_clip_val=0.5,
         callbacks=[lrLogger],
         profiler=profiler,

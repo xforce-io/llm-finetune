@@ -18,7 +18,7 @@ def loadTokenizer(modelArgs):
         "cache_dir": modelArgs.cache_dir,
         "use_fast": modelArgs.use_fast_tokenizer,
         "revision": modelArgs.model_revision,
-        "token": True if modelArgs.use_auth_token else None,
+        "use_auth_token": modelArgs.use_auth_token,
         "trust_remote_code": True
     }
     if modelArgs.tokenizer_name:
@@ -45,7 +45,7 @@ def loadPretrain(modelArgs :ModelArguments) :
     config_kwargs = {
         "cache_dir": modelArgs.cache_dir,
         "revision": modelArgs.model_revision,
-        "token": True if modelArgs.use_auth_token else None,
+        "use_auth_token": modelArgs.use_auth_token,
         "trust_remote_code": True
     }
     if modelArgs.config_name:
@@ -74,7 +74,7 @@ def loadPretrain(modelArgs :ModelArguments) :
                 config=config,
                 cache_dir=modelArgs.cache_dir,
                 revision=modelArgs.model_revision,
-                token=True if modelArgs.use_auth_token else None,
+                use_auth_token=modelArgs.use_auth_token,
                 torch_dtype=torch_dtype,
                 low_cpu_mem_usage=True,
                 load_in_8bit=True,
@@ -87,8 +87,10 @@ def loadPretrain(modelArgs :ModelArguments) :
                 config=config,
                 cache_dir=modelArgs.cache_dir,
                 revision=modelArgs.model_revision,
-                token=True if modelArgs.use_auth_token else None,
+                use_auth_token=modelArgs.use_auth_token,
                 torch_dtype=torch_dtype,
+                low_cpu_mem_usage=modelArgs.low_cpu_mem_usage,
+                trust_remote_code=True,
                 low_cpu_mem_usage=modelArgs.low_cpu_mem_usage,
                 trust_remote_code=True)
     else:
