@@ -95,7 +95,8 @@ class FrameworkDDP(Framework):
         )
         return ([optimizer], [scheduler])
 
-def trainerMain(framework, dataModule, args):
+def trainerMain(framework, args):
+    dataModule = DataModule(args)
     model = loadPretrain(args.modelArgs)
     model.resize_token_embeddings(len(dataModule.tokenizer))
     
@@ -129,10 +130,6 @@ def trainerMain(framework, dataModule, args):
     dist.log_summary()
 
 if __name__ == "__main__":
-    args = ArgsLit()
-    initLogging(args)
-    dataModule = DataModule(args)
-
     torch.set_float32_matmul_precision("high")
     if "SLURM_NTASKS" in os.environ:
         print(f"procid[{os.environ['SLURM_PROCID']}] ntasks[{os.environ['SLURM_NTASKS']}]")
@@ -142,6 +139,9 @@ if __name__ == "__main__":
             backend="nccl")
     else:
         torch.distributed.init_process_group(backend="nccl")
+
+    args = ArgsLit()
+    initLogging(args)
 
     framework = FrameworkDeepSpeed(args)
     trainerMain(framework, args)
