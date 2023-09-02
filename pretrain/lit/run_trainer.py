@@ -132,6 +132,8 @@ def trainerMain(framework, args):
 if __name__ == "__main__":
     torch.set_float32_matmul_precision("high")
     if "SLURM_NTASKS" in os.environ:
+        
+        print(f"procid[{os.environ['SLURM_PROCID']}] ntasks[{os.environ['SLURM_NTASKS']}]")
         torch.distributed.init_process_group(
             rank=int(os.environ["SLURM_PROCID"]),
             world_size=int(os.environ["SLURM_NTASKS"]),
