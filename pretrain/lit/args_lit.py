@@ -51,6 +51,14 @@ class TrainingArgumentsLit(TrainingArguments):
         }
     )
 
+    every_n_train_steps: Optional[int] = field(
+        default=10000, 
+        metadata={
+            "help": "Steps to save a checkpoint."
+        }
+    )
+
+
     logger_tensorboard: bool = field(
         default=True, metadata={"help": "Board type"}
     )

@@ -1,5 +1,7 @@
 import sys
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 kPattern = "train_loss="
 kStop = "]"
@@ -20,7 +22,9 @@ if __name__ == "__main__":
             curIdx = stopIdx
             nextIdx = line.find(kPattern, curIdx)
 
+    smoothed_data = np.convolve(results, np.ones(100)/100, mode='valid')  # 使用简单移动平均进行平滑处理
     plt.plot(results, marker='o', linestyle='-', color='b', label='Data')
+    plt.plot(smoothed_data, marker='', linestyle='-', color='r', label='Smoothed Data')
     plt.title('Line Chart')
     plt.xlabel('X-axis')
     plt.ylabel('Y-axis')
