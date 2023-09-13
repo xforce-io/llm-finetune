@@ -2,8 +2,7 @@ import os
 import torch
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.strategies import DeepSpeedStrategy, DDPStrategy
-from pytorch_lightning.callbacks import LearningRateMonitor
-from lightning.pytorch.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint
 from lightning.pytorch.profilers.simple import SimpleProfiler
 from torch.optim import Adam
 from torch.optim.lr_scheduler import LambdaLR
@@ -103,12 +102,9 @@ def trainerMain(framework, args):
     
     llmModule = LlmModule(model, framework, args)
     
-    lrLogger = LearningRateMonitor(logging_interval="step")
-
     ckptCallback = ModelCheckpoint(
         dirpath=args.trainArgs.output_dir, 
-        every_n_train_steps=args.trainArgs.every_n_train_steps,
-        save_top_k=3)
+        every_n_train_steps=args.trainArgs.every_n_train_steps)
     
     profiler = SimpleProfiler()
     trainer = Trainer(
@@ -118,7 +114,7 @@ def trainerMain(framework, args):
         strategy=framework.makeStrategy(args),
         val_check_interval=0.2,
         gradient_clip_val=0.5,
-        callbacks=[lrLogger, ckptCallback],
+        callbacks=[ckptCallback],
         profiler=profiler,
         enable_checkpointing=True,
         default_root_dir=args.trainArgs.default_root_dir,
