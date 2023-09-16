@@ -44,13 +44,15 @@ class FabricTrainer:
 
     def fit(self):
         self.model = loadPretrain(self.args.modelArgs)
-        optimizer = DeepSpeedCPUAdam(self.model.parameters())
+        optimizer = DeepSpeedCPUAdam(self.model.parameters(), weight_decay=0.1)
         self.model, self.optimizer = self.fabric.setup(self.model, optimizer)
         for epoch in range(self.args.trainArgs.num_train_epochs):
             self._trainStep()
             self._evalStep()
 
     def _trainStep(self):
+        accuBatches = self.args.trainArgs.accumulate_grad_batches
+        
         self.model.train()
         curLoss = None
         iterable = self._progBarWrapper(
@@ -59,10 +61,12 @@ class FabricTrainer:
             desc=f"Trainning epochs {self.currentEpoch}/{curLoss}")
         for batchIdx, batch in enumerate(iterable):
             outputs = self.model(**batch)
-            curLoss = outputs[0]
+            curLoss = outputs[0] / accuBatches
             self.fabric.backward(curLoss)
-            self.optimizer.step()
-            self.optimizer.zero_grad()
+
+            if (batchIdx+1) % accuBatches == 0 or batchIdx+1 == len(iterable):
+                self.optimizer.step()
+                self.optimizer.zero_grad()
 
     def _evalStep(self):
         self.model.eval()
