@@ -16,6 +16,12 @@ from pretrain.data import DataModule
 from pretrain.lit.args_lit import ArgsLit
 from pretrain.load_pretrain import loadPretrain
 
+from pretrain.llama_flash_attn_monkey_patch import (
+    replace_llama_attn_with_flash_attn,
+)
+
+replace_llama_attn_with_flash_attn()
+
 class FabricTrainer:
     def __init__(self) -> None:
         self.args = ArgsLit()
@@ -44,6 +50,8 @@ class FabricTrainer:
 
     def fit(self):
         self.model = loadPretrain(self.args.modelArgs)
+        self.model.resize_token_embeddings(len(self.dataModule.tokenizer))
+
         optimizer = DeepSpeedCPUAdam(self.model.parameters(), weight_decay=0.1)
         self.model, self.optimizer = self.fabric.setup(self.model, optimizer)
         for epoch in range(self.args.trainArgs.num_train_epochs):
@@ -60,7 +68,7 @@ class FabricTrainer:
             total=len(self.trainDataloader),
             desc=f"Trainning epochs {self.currentEpoch}/{curLoss}")
         for batchIdx, batch in enumerate(iterable):
-            outputs = self.model(**batch)
+            outputs = self.model(**batch, use_cache=False)
             curLoss = outputs[0] / accuBatches
             self.fabric.backward(curLoss)
 
@@ -76,7 +84,7 @@ class FabricTrainer:
             desc=f"evaluation")
         with torch.no_grad():
             for batchIdx, batch in enumerate(iterable):
-                outputs = self.model(**batch)
+                outputs = self.model(**batch, use_cache=False)
                 loss = outputs[0]
             print("eval loss[%f]" % loss)
 
