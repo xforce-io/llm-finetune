@@ -105,6 +105,7 @@ def trainerMain(framework, args):
     
     ckptCallback = ModelCheckpoint(
         dirpath=args.trainArgs.output_dir, 
+        save_last=True,
         every_n_train_steps=args.trainArgs.every_n_train_steps)
     
     profiler = SimpleProfiler()
