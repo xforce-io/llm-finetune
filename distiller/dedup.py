@@ -1,14 +1,17 @@
-kLimit = 10000000
+from langdetect import detect
 
-def dedupBasic(arr):
+kLimit = 10000000
+kLangs = ["zh-cn"]
+
+def filterBasic(arr):
     arr = sorted(arr)
     lenArr = len(arr)
-    deduped = []
+    filtered = []
     for i in range(lenArr-1) :
         if arr[i] != arr[i+1]:
-            deduped.append(arr[i])
-    deduped.append(arr[-1])
-    return deduped
+            filtered.append(arr[i])
+    filtered.append(arr[-1])
+    return filtered
 
 def jaccardSimilarity(sentence1, sentence2):
     # Tokenize the sentences into sets of words
@@ -18,28 +21,36 @@ def jaccardSimilarity(sentence1, sentence2):
     # Calculate Jaccard similarity
     intersection = len(words1.intersection(words2))
     union = len(words1) + len(words2) - intersection
-    similarity = intersection / union
+    return float(intersection) / union
 
-    return similarity
-
-def dedupJaccard(sortedArr):
+def filterJaccard(sortedArr):
     lenArr = len(sortedArr)
-    deduped = []
+    filtered = []
     for i in range(lenArr-1) :
         if i % 2000 :
             print("process[%d]" % i)
 
         similarity = jaccardSimilarity(sortedArr[i], sortedArr[i+1])
         if similarity < 0.7:
-            deduped.append(sortedArr[i])
+            filtered.append(sortedArr[i])
         else:
-            print("filtered sent[%s|%s|%s]" % (sortedArr[i], sortedArr[i+1], similarity))
-    deduped.append(sortedArr[-1])
-    return deduped
+            print("filtered[%s] reason[jaccard|%f]" % (sortedArr[i], similarity))
+    filtered.append(sortedArr[-1])
+    return filtered
 
-def dedup(arr):
-    dedup = dedupBasic(arr)
-    return dedupJaccard(dedup)
+def filterLang(arr):
+    lenArr = len(arr)
+    filtered = []
+    for item in arr:
+        lang = detect(item)
+        if lang in kLangs:
+            filtered += [item]
+    return filtered
+
+def filter(arr):
+    filter = filterBasic(arr)
+    filter = filterLang(filter)
+    return filterJaccard(filter)
 
 def readlinesFromFile(filepath, limit):
     with open(filepath, "r") as file:
@@ -52,9 +63,9 @@ def readlinesFromFile(filepath, limit):
             lines.append(line.strip())
     return lines
 
-def dedepFile(inputPath, outputPath):
+def filterFile(inputPath, outputPath):
     lines = readlinesFromFile(inputPath, kLimit)
-    lines = dedup(lines)
+    lines = filter(lines)
     with open(outputPath, "w") as fout:
         for line in lines:
             fout.write("%s\n" % line)
@@ -68,7 +79,8 @@ if __name__ == "__main__":
             "The quick brown fox jumps over the lazy dog",
             "i love having such a beautiful little dog"]
 
-    tested = dedup(tested)
+    kLangs = ["en"]
+    tested = filter(tested)
     assert len(tested) == 3
 
-    dedepFile("/tmp/input.txt", "/tmp/input.txt")
+    filterFile("/tmp/input.txt", "/tmp/output.txt")
