@@ -42,6 +42,9 @@ def filterLang(arr):
     lenArr = len(arr)
     filtered = []
     for item in arr:
+        if len(item.strip()) == 0:
+            continue
+
         lang = detect(item)
         if lang in kLangs:
             filtered += [item]
