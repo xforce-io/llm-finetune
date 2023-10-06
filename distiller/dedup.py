@@ -1,4 +1,6 @@
+import time
 from langdetect import detect
+from langdetect.lang_detect_exception import LangDetectException
 
 kLimit = 10000000
 kLangs = ["zh-cn"]
@@ -27,7 +29,7 @@ def filterJaccard(sortedArr):
     lenArr = len(sortedArr)
     filtered = []
     for i in range(lenArr-1) :
-        if i % 2000 :
+        if i % 2000 == 0 :
             print("process[%d]" % i)
 
         similarity = jaccardSimilarity(sortedArr[i], sortedArr[i+1])
@@ -45,7 +47,12 @@ def filterLang(arr):
         if len(item.strip()) == 0:
             continue
 
-        lang = detect(item)
+        try:
+            lang = detect(item)
+        except LangDetectException:
+            print("fail detect lang for[%s]" % item)
+            continue
+
         if lang in kLangs:
             filtered += [item]
     return filtered
@@ -86,4 +93,8 @@ if __name__ == "__main__":
     tested = filter(tested)
     assert len(tested) == 3
 
-    filterFile("/tmp/input.txt", "/tmp/output.txt")
+    kLangs = ["zh-cn"]
+    t0 = time.time()
+    filterFile("/mnt/data1/dev/data/common_crawl/202210/clean_docs1.txt", "/tmp/output.txt")
+    t1 = time.time()
+    print("all finished cost[%f]" % (t1-t0))
