@@ -70,7 +70,7 @@ class Framework(object):
 class FrameworkDeepSpeed(Framework):
     def makeStrategy(self, args):
         strategy = DeepSpeedStrategy(config=args.dataArgs.deepspeed_config)
-        args.trainArgs.train_micro_batch_size_per_gpu = strategy.config["train_micro_batch_size_per_gpu"]
+        strategy.config["train_micro_batch_size_per_gpu"] = args.trainArgs.train_micro_batch_size_per_gpu
         return strategy
 
 class FrameworkDDP(Framework):
