@@ -1,3 +1,5 @@
+#!/bin/bash
+
 export MASTER_ADDR=10.4.119.108
 export MASTER_PORT=12314
 export TRANSFORMERS_CACHE=/mnt/data1/.cache/huggingface/hub

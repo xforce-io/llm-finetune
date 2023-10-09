@@ -67,6 +67,8 @@ class TrainingArgumentsLit(TrainingArguments):
         for k, v in kwargs.items():
             if k in names:
                 setattr(self, k, v)
+        
+        super().__post_init__()
 
 class ArgsLit:
     def __init__(self) -> None:
