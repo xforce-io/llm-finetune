@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# SLURM SUBMIT SCRIPT
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=8
+#SBATCH --gres=gpu:8
+
 export MASTER_ADDR=10.4.119.108
 export MASTER_PORT=12314
 export TRANSFORMERS_CACHE=/mnt/data1/.cache/huggingface/hub
