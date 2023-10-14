@@ -58,7 +58,7 @@ class TrainingArgumentsLit(TrainingArguments):
         }
     )
 
-    lgger_tensorboard: bool = field(
+    logger_tensorboard: bool = field(
         default=True, metadata={"help": "Board type"}
     )
 
