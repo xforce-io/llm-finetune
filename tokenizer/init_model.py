@@ -5,16 +5,13 @@
 Initialize new model with updated tokenizer by calculating the mean values from original model
 """
 import argparse
-
 import numpy as np
 import torch
 from transformers import LlamaTokenizer, LlamaForCausalLM
-
 from colossalai.logging import get_dist_logger
 
-
+kToken = "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"
 logger = get_dist_logger()
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -29,14 +26,18 @@ def main():
     parser.add_argument("--target_model_path", type=str, required=True, default=None, help="Target model path")
     args = parser.parse_args()
 
-    source_tokenizer = LlamaTokenizer.from_pretrained(args.source_model_and_tokenizer_path)
+    source_tokenizer = LlamaTokenizer.from_pretrained(
+        args.source_model_and_tokenizer_path,
+        use_auth_token=kToken)
     source_tokenizer.add_bos_token = False
     source_tokenizer.add_eos_token = False
     if source_tokenizer.pad_token is None:
         source_tokenizer.pad_token = source_tokenizer.unk_token
     source_vocab = source_tokenizer.get_vocab()
 
-    target_tokenizer = LlamaTokenizer.from_pretrained(args.target_tokenizer_path)
+    target_tokenizer = LlamaTokenizer.from_pretrained(
+        args.target_tokenizer_path,
+        use_auth_token=kToken)
     target_tokenizer.add_bos_token = False
     target_tokenizer.add_eos_token = False
     if target_tokenizer.pad_token is None:
@@ -51,7 +52,9 @@ def main():
     gpu_device = torch.device("cuda:0")
     cpu_device = torch.device("cpu")
 
-    source_model = LlamaForCausalLM.from_pretrained(args.source_model_and_tokenizer_path)
+    source_model = LlamaForCausalLM.from_pretrained(
+        args.source_model_and_tokenizer_path,
+        use_auth_token=kToken)
     source_model.eval()
     source_model = source_model.to(gpu_device)
 

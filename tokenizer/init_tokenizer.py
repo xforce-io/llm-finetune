@@ -9,16 +9,12 @@ import argparse
 import os
 import json
 from typing import List, Union
-
 from transformers.models.llama.tokenization_llama import LlamaTokenizer
 from sentencepiece import sentencepiece_model_pb2 as sp_pb2_model
-
 from colossalai.logging import get_dist_logger
 
-os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
-
+kToken = "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"
 logger = get_dist_logger()
-
 
 def expand_vocab_tokenizer(
     source_tokenizer_dir: Union[str, os.PathLike], target_tokenizer_dir: Union[str, os.PathLike], new_tokens: List[str]
@@ -27,7 +23,7 @@ def expand_vocab_tokenizer(
     if os.path.exists(target_tokenizer_dir):
         raise RuntimeError(f"Find existed directory {target_tokenizer_dir}")
 
-    source_tokenizer = LlamaTokenizer.from_pretrained(source_tokenizer_dir)
+    source_tokenizer = LlamaTokenizer.from_pretrained(source_tokenizer_dir, use_auth_token=kToken)
     logger.info(source_tokenizer)
     source_sp_processor = source_tokenizer.sp_model
     source_spm = sp_pb2_model.ModelProto()

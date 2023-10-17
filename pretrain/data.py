@@ -38,6 +38,7 @@ def loadDataset(dataArgs, modelArgs) :
     if dataArgs.train_file is not None:
         data_files["train"] = dataArgs.train_file
     if dataArgs.validation_file is not None:
+        
         data_files["validation"] = dataArgs.validation_file
     extension = (
         dataArgs.train_file.split(".")[-1]
@@ -224,6 +225,7 @@ def makeDataset(tokenizer, args, tokenized_datasets) :
         if "validation" not in tokenized_datasets:
             raise ValueError("--do_eval requires a validation dataset")
         dataset.set_eval_dataset(lm_datasets["validation"], args.dataArgs)
+        log.info("token_size_to_be_validated[%d]" % (len(lm_datasets["validation"]) * block_size))
     return dataset
 
 from torch.utils.data import DataLoader
